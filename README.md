@@ -2,12 +2,27 @@
 
 ## Status
 
-**Project 1 — Khmer Unicode & Grapheme Engine is implemented**, and
-**Project 4 — Tokenizer Lab has a first version**, both in
-[`khmer_language/`](khmer_language/). Everything else in this document is
-the roadmap, not yet built.
+The **entire text pipeline runs end to end**, from Khmer Unicode through a
+trained language model, in [`khmer_language/`](khmer_language/):
 
-What exists today, with no third-party dependencies (stdlib only):
+| Project | Status |
+|---|---|
+| 1 — Khmer Unicode & grapheme engine | ✅ done |
+| 2 — Grapheme & syllable parser | ✅ done |
+| 3 — **Khmer corpus** | ❌ **not started — the blocker** |
+| 4 — Tokenizer lab | ✅ done (Unigram pending) |
+| 5 — Word2Vec | ✅ done |
+| 6 — Transformer from scratch | ✅ done |
+| 7 — KhmerGPT-0 | ✅ trains end to end |
+| 8 — KhmerGPT-Instruct | ❌ needs a corpus |
+| 9–10 — Chatbot, voice | ❌ not started |
+
+**The honest caveat:** everything above trains on `SAMPLE_CORPUS` — eight
+hand-written sentences. The machinery is real and tested; the *data* is a
+placeholder. Project 3 now gates every remaining milestone.
+
+Core Unicode/linguistics work has no third-party dependencies (stdlib
+only); the model stack uses NumPy and nothing else.
 
 - `khmer_language/unicode/codepoints.py` — a machine-readable database of
   the full Khmer Unicode block (U+1780–U+17FF): 35 consonants (with
@@ -111,7 +126,24 @@ holds by construction rather than having to be learned** — even the
 untrained model emits structurally valid Khmer, confirmed by the Project 1
 validator.
 
-177 tests in `tests/`, run with `python3 -m pytest tests/`.
+`khmer_language/evaluation/` — the evaluation system (README §17–18):
+perplexity, Unicode validity rate, an error analyzer, and a benchmark
+harness. Two things worth noting.
+
+First, it introduces **Grapheme Error Rate** alongside standard CER.
+Codepoint-level CER misrepresents Khmer: dropping the single cluster ម្ពុ
+is *one* error to a reader but spans 4 codepoints, so CER scores that
+mistake at 4/7 where GER correctly scores it 1/3. GER measures over the
+units Khmer readers actually perceive.
+
+Second, the error analyzer **refuses to fabricate scores**. §18 asks for
+Spelling/Grammar/Meaning/Naturalness, none of which are honestly
+computable without the dictionary (§8) or a judge model. Those report
+`UNAVAILABLE` with the reason, and coverage prints as `3/7 checks
+implemented` — a fake "Naturalness: 0.91" would make the model look
+evaluated when it isn't, which is the exact failure §18 exists to prevent.
+
+208 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for
@@ -123,8 +155,8 @@ Try it:
 python3 -m khmer_language "កម្ពុជា"
 ```
 
-The rest of this document is the full project plan (Projects 2–10, Phases
-1–30) that Project 1 is the foundation for.
+The rest of this document is the original full project plan (Projects
+1–10, sections 1–30), annotated with status where work has landed.
 
 ---
 
@@ -919,6 +951,14 @@ KhmerAI Benchmark
 ```
 
 with categories:
+
+**Status: harness implemented** — `khmer_language/evaluation/`
+(perplexity, CER, Khmer-aware Grapheme Error Rate, Unicode validity,
+error analyzer, benchmark runner). What does *not* exist is populated
+test data for the comprehension/knowledge/translation/reasoning
+categories below: those need authored Khmer cases with native-speaker
+judgement, and auto-generating them would produce a benchmark that
+measures nothing.
 
 ### Khmer writing
 

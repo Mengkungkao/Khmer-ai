@@ -62,12 +62,19 @@ def _run_train_demo(steps: int) -> int:
                    log_every=max(1, steps // 5))
 
     print(f"\nloss {report.losses[0]:.3f} -> {report.final_loss:.3f}")
+
+    from .evaluation import analyze_output, format_report, perplexity
+
+    ppl = perplexity(model, data, seq_len=16)
+    print(f"perplexity on training data: {ppl.perplexity:.2f} over {ppl.num_tokens} tokens")
+    print("(this is training data, so it measures memorization, not generalization)")
+
     sample = tokenizer.decode(
         model.generate(list(data[:3]), max_new_tokens=25, temperature=0.8,
                        rng=np.random.default_rng(7))
     )
-    print(f"\nsample: {sample}")
-    print(f"structurally valid Khmer: {is_valid(sample)}")
+    print()
+    print(format_report(analyze_output(sample)))
     return 0
 
 
