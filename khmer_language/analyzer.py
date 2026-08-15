@@ -14,9 +14,11 @@ from .unicode.character_types import CharacterType, classify, unicode_name
 from .unicode.cluster import ConsonantCluster, analyze_cluster
 from .unicode.grapheme import Grapheme, segment_graphemes
 from .unicode.normalizer import normalize as normalize_text
+from .unicode.sentence import Sentence, segment_sentences
 from .unicode.syllable import Syllable, segment_syllables
 from .unicode.transliterator import transliterate
 from .unicode.validator import ValidationIssue, validate
+from .unicode.word import Word, segment_words
 
 
 @dataclass(frozen=True)
@@ -33,6 +35,8 @@ class AnalysisResult:
     characters: tuple[CharacterInfo, ...]
     graphemes: tuple[Grapheme, ...]
     syllables: tuple[Syllable, ...]
+    words: tuple[Word, ...]
+    sentences: tuple[Sentence, ...]
     clusters: tuple[ConsonantCluster, ...]
     issues: tuple[ValidationIssue, ...]
     transliteration: str
@@ -57,6 +61,8 @@ def analyze(text: str, *, normalize: bool = True) -> AnalysisResult:
     )
     graphemes = tuple(segment_graphemes(text))
     syllables = tuple(segment_syllables(text))
+    words = tuple(segment_words(text))
+    sentences = tuple(segment_sentences(text))
     clusters = tuple(analyze_cluster(g) for g in graphemes)
     issues = tuple(validate(text))
 
@@ -65,6 +71,8 @@ def analyze(text: str, *, normalize: bool = True) -> AnalysisResult:
         characters=characters,
         graphemes=graphemes,
         syllables=syllables,
+        words=words,
+        sentences=sentences,
         clusters=clusters,
         issues=issues,
         transliteration=transliterate(text),
@@ -81,6 +89,8 @@ def format_analysis(result: AnalysisResult) -> str:
     lines.append("")
     lines.append(f"Graphemes ({len(result.graphemes)}): " + " | ".join(g.text for g in result.graphemes))
     lines.append(f"Syllables ({len(result.syllables)}): " + " | ".join(s.text for s in result.syllables))
+    lines.append(f"Words ({len(result.words)}): " + " | ".join(w.text for w in result.words))
+    lines.append(f"Sentences ({len(result.sentences)}): " + " | ".join(s.text for s in result.sentences))
     lines.append(f"Transliteration: {result.transliteration}")
 
     lines.append("")

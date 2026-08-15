@@ -23,6 +23,12 @@ What exists today, with no third-party dependencies (stdlib only):
   subscripts / register shifter / vowel / diacritics.
 - `syllable.py` — syllable segmentation (v1: approximated as one grapheme
   cluster per syllable; see the module docstring for the known limits).
+- `sentence.py` — sentence segmentation on KHAN/BARIYOOSAN (។ ៕) and ASCII
+  `.!?`.
+- `word.py` — word segmentation, v1: splits on ZWSP/whitespace/punctuation
+  boundaries only. A boundary-free run of Khmer is returned as one "word"
+  — real segmentation needs a dictionary, which doesn't exist yet
+  (Project 3/4). Documented limitation, not a bug.
 - `normalizer.py` — NFC + whitespace normalization (conservative by
   design — see module docstring for what it deliberately does not do).
 - `validator.py` — structural well-formedness checks (orphan combining
@@ -1469,8 +1475,10 @@ syllables
 ```
 
 **Status: implemented** as part of Project 1 (`khmer_language/unicode/grapheme.py`,
-`syllable.py`) — word segmentation (`KhmerWordSegmenter`) is not yet built;
-it needs a corpus/dictionary first (see Project 3).
+`syllable.py`, `sentence.py`). `word.py` has a v1 `KhmerWordSegmenter` that
+only splits on explicit boundary hints (ZWSP/whitespace/punctuation);
+dictionary-free segmentation of continuous Khmer needs a corpus first
+(see Project 3).
 
 ---
 

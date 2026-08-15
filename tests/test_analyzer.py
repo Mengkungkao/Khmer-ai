@@ -16,6 +16,8 @@ def test_analyze_kampuchea_end_to_end():
     ]
     assert [g.text for g in result.graphemes] == ["ក", "ម្ពុ", "ជា"]
     assert [s.text for s in result.syllables] == ["ក", "ម្ពុ", "ជា"]
+    assert [w.text for w in result.words] == ["កម្ពុជា"]
+    assert [s.text for s in result.sentences] == ["កម្ពុជា"]
     assert result.transliteration == "kâmpŭchéa"
     assert result.is_valid
     assert result.issues == ()
