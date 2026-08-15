@@ -49,7 +49,17 @@ side by side — run it with `python -m khmer_language --compare-tokenizers`.
 There is no real Khmer corpus yet (Project 3, not started), so training
 uses a small placeholder `SAMPLE_CORPUS`.
 
-75 tests in `tests/`, run with `python3 -m pytest tests/`.
+`khmer_language/embeddings/` — Word2Vec Skip-Gram with negative sampling
+(Project 5 / README section 11), written from scratch with NumPy: two
+weight matrices, the 3/4-power unigram noise distribution, manual
+forward/backward pass. The tokenizer is pluggable, so it trains over
+Khmer graphemes/syllables/BPE subwords rather than assuming
+space-separated words. Verified to actually learn: on a corpus where ថៃ
+(Thailand) and ឡាវ (Laos) appear in interchangeable contexts, ថៃ ends up
+measurably closer to ឡាវ than to an unrelated token — across every seed
+tested, exactly the effect section 11 predicts.
+
+87 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for
@@ -1525,6 +1535,14 @@ Unigram
 (character, grapheme, syllable, grapheme-aware BPE + comparison harness).
 Unigram tokenization and training on a real corpus are not done yet
 (waiting on Project 3).
+
+---
+
+### Project 5 — Khmer Word2Vec
+
+**Status: implemented** — `khmer_language/embeddings/word2vec.py`
+(skip-gram + negative sampling from scratch in NumPy). Visualization is
+not built yet.
 
 ---
 
