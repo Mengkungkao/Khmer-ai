@@ -69,7 +69,22 @@ checks are verified to be meaningful, not vacuous: a deliberately
 sabotaged LayerNorm backward scores a relative error of 1.0 against the
 1e-6 threshold that correct math passes at 2e-9.
 
-108 tests in `tests/`, run with `python3 -m pytest tests/`.
+`attention.py` adds multi-head **causal** self-attention and
+`transformer.py` the pre-norm `TransformerBlock` (`x + attn(norm(x))`,
+`x + ffn(norm(x))`), both with hand-derived backward passes. Causality is
+tested as a property, not assumed: scrambling later positions must leave
+earlier outputs bit-for-bit identical.
+
+Gradient checking found a genuine mathematical fact worth knowing: the
+attention **key bias gradient is exactly zero**. Adding `b_k` shifts every
+score in a row by the same amount, and softmax is shift-invariant along
+that axis, so `b_k` cannot affect the output at all (verified: scrambling
+it changes outputs by 7e-16). That's why gradient checks need both a
+relative *and* an absolute tolerance — the finite-difference estimate of a
+truly-zero gradient is pure cancellation noise (~1e-11), which no relative
+test can accept. The combined check still catches a 0.1% gradient error.
+
+146 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for

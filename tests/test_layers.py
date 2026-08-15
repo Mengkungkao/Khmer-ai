@@ -7,7 +7,7 @@ these checks are the actual correctness bar for the from-scratch layers.
 import numpy as np
 import pytest
 
-from khmer_language.models.from_scratch.gradcheck import numerical_gradient, relative_error
+from khmer_language.models.from_scratch.gradcheck import gradients_match, numerical_gradient
 from khmer_language.models.from_scratch.layers import (
     GELU,
     Embedding,
@@ -16,9 +16,6 @@ from khmer_language.models.from_scratch.layers import (
     cross_entropy_loss,
     softmax,
 )
-
-GRAD_TOL = 1e-6
-
 
 def _check_input_grad(layer, x, seed=0):
     """Analytic vs numerical gradient w.r.t. the layer input."""
@@ -29,7 +26,7 @@ def _check_input_grad(layer, x, seed=0):
     analytic = layer.backward(dout)
 
     numeric = numerical_gradient(lambda: float((layer.forward(x) * dout).sum()), x)
-    return relative_error(analytic, numeric)
+    return gradients_match(analytic, numeric)
 
 
 def _check_param_grad(layer, x, param, seed=0):
@@ -43,7 +40,7 @@ def _check_param_grad(layer, x, param, seed=0):
     analytic = param.grad.copy()
 
     numeric = numerical_gradient(lambda: float((layer.forward(x) * dout).sum()), param.value)
-    return relative_error(analytic, numeric)
+    return gradients_match(analytic, numeric)
 
 
 # --------------------------------------------------------------------------
@@ -60,15 +57,15 @@ def test_linear_forward_shape_and_value():
 def test_linear_input_gradient():
     rng = np.random.default_rng(1)
     layer = Linear(4, 3, rng)
-    assert _check_input_grad(layer, rng.normal(size=(5, 4))) < GRAD_TOL
+    assert _check_input_grad(layer, rng.normal(size=(5, 4)))
 
 
 def test_linear_weight_and_bias_gradients():
     rng = np.random.default_rng(2)
     layer = Linear(4, 3, rng)
     x = rng.normal(size=(5, 4))
-    assert _check_param_grad(layer, x, layer.W) < GRAD_TOL
-    assert _check_param_grad(layer, x, layer.b) < GRAD_TOL
+    assert _check_param_grad(layer, x, layer.W)
+    assert _check_param_grad(layer, x, layer.b)
 
 
 def test_linear_handles_extra_batch_dimensions():
@@ -76,14 +73,14 @@ def test_linear_handles_extra_batch_dimensions():
     layer = Linear(4, 3, rng)
     x = rng.normal(size=(2, 5, 4))  # (batch, time, features)
     assert layer.forward(x).shape == (2, 5, 3)
-    assert _check_input_grad(layer, x) < GRAD_TOL
+    assert _check_input_grad(layer, x)
 
 
 def test_linear_without_bias_has_one_parameter():
     rng = np.random.default_rng(4)
     layer = Linear(3, 2, rng, bias=False)
     assert len(layer.parameters()) == 1
-    assert _check_input_grad(layer, rng.normal(size=(4, 3))) < GRAD_TOL
+    assert _check_input_grad(layer, rng.normal(size=(4, 3)))
 
 
 # --------------------------------------------------------------------------
@@ -100,21 +97,21 @@ def test_layernorm_normalizes_last_axis():
 def test_layernorm_input_gradient():
     rng = np.random.default_rng(6)
     layer = LayerNorm(5)
-    assert _check_input_grad(layer, rng.normal(size=(4, 5))) < GRAD_TOL
+    assert _check_input_grad(layer, rng.normal(size=(4, 5)))
 
 
 def test_layernorm_gamma_and_beta_gradients():
     rng = np.random.default_rng(7)
     layer = LayerNorm(5)
     x = rng.normal(size=(4, 5))
-    assert _check_param_grad(layer, x, layer.gamma) < GRAD_TOL
-    assert _check_param_grad(layer, x, layer.beta) < GRAD_TOL
+    assert _check_param_grad(layer, x, layer.gamma)
+    assert _check_param_grad(layer, x, layer.beta)
 
 
 def test_layernorm_input_gradient_with_batch_dims():
     rng = np.random.default_rng(8)
     layer = LayerNorm(4)
-    assert _check_input_grad(layer, rng.normal(size=(2, 3, 4))) < GRAD_TOL
+    assert _check_input_grad(layer, rng.normal(size=(2, 3, 4)))
 
 
 # --------------------------------------------------------------------------
@@ -130,7 +127,7 @@ def test_gelu_is_near_zero_for_large_negative_and_identity_for_large_positive():
 def test_gelu_input_gradient():
     rng = np.random.default_rng(9)
     layer = GELU()
-    assert _check_input_grad(layer, rng.normal(size=(4, 5))) < GRAD_TOL
+    assert _check_input_grad(layer, rng.normal(size=(4, 5)))
 
 
 # --------------------------------------------------------------------------
@@ -166,7 +163,7 @@ def test_embedding_weight_gradient_matches_numerical():
     analytic = layer.weight.grad.copy()
 
     numeric = numerical_gradient(lambda: float((layer.forward(ids) * dout).sum()), layer.weight.value)
-    assert relative_error(analytic, numeric) < GRAD_TOL
+    assert gradients_match(analytic, numeric)
 
 
 # --------------------------------------------------------------------------
@@ -210,7 +207,7 @@ def test_cross_entropy_gradient_matches_numerical():
 
     _, analytic = cross_entropy_loss(logits, targets)
     numeric = numerical_gradient(lambda: cross_entropy_loss(logits, targets)[0], logits)
-    assert relative_error(analytic, numeric) < GRAD_TOL
+    assert gradients_match(analytic, numeric)
 
 
 def test_cross_entropy_handles_batch_time_shape():
