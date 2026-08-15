@@ -9,6 +9,7 @@ from .character import CharacterTokenizer
 from .compare import SAMPLE_CORPUS, TokenizerStats, compare, format_comparison
 from .grapheme import GraphemeTokenizer
 from .syllable import SyllableTokenizer
+from .unigram import UnigramTokenizer
 
 __all__ = [
     "BaseTokenizer",
@@ -17,6 +18,7 @@ __all__ = [
     "CharacterTokenizer",
     "GraphemeTokenizer",
     "SyllableTokenizer",
+    "UnigramTokenizer",
     "SAMPLE_CORPUS",
     "TokenizerStats",
     "compare",

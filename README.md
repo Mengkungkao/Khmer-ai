@@ -10,7 +10,7 @@ trained language model, in [`khmer_language/`](khmer_language/):
 | 1 — Khmer Unicode & grapheme engine | ✅ done |
 | 2 — Grapheme & syllable parser | ✅ done |
 | 3 — Khmer corpus | ⚠️ pipeline done, **no data yet — the blocker** |
-| 4 — Tokenizer lab | ✅ done (Unigram pending) |
+| 4 — Tokenizer lab | ✅ done |
 | 5 — Word2Vec | ✅ done |
 | 6 — Transformer from scratch | ✅ done |
 | 7 — KhmerGPT-0 | ✅ trains end to end |
@@ -53,16 +53,38 @@ only); the model stack uses NumPy and nothing else.
 - `transliterator.py` — best-effort Khmer→Latin transliteration.
 - `analyzer.py` + `cli.py` — ties it together: `python -m khmer_language "កម្ពុជា"`.
 
-`khmer_language/tokenizer/` — the Tokenizer Lab (Project 4 / README
-section 10): `CharacterTokenizer`, `GraphemeTokenizer`, `SyllableTokenizer`,
-and a grapheme-aware `BPETokenizer` (merges start from Khmer grapheme
-clusters, not raw code points, so a learned token can never split a
-COENG subscript from its base). All share a common vocab/encode/decode
-interface (`tokenizer/base.py`). `tokenizer/compare.py` reports
-vocab size / sequence length / compression ratio / unknown-token rate
-side by side — run it with `python -m khmer_language --compare-tokenizers`.
-There is no real Khmer corpus yet (Project 3, not started), so training
-uses a small placeholder `SAMPLE_CORPUS`.
+`khmer_language/tokenizer/` — the Tokenizer Lab (Project 4 / §10): all six
+variants §10 asks for — `CharacterTokenizer`, `GraphemeTokenizer`,
+`SyllableTokenizer`, plus a grapheme-aware `BPETokenizer` and
+`UnigramTokenizer`. Both learned tokenizers build pieces from whole Khmer
+grapheme clusters, so no learned token can split a COENG subscript from
+its base consonant.
+
+BPE and Unigram are genuinely different algorithms, which is what makes
+comparing them worthwhile: BPE starts small and **grows** by greedily
+merging frequent pairs, while Unigram starts with a large candidate set
+and **prunes** it down, keeping whatever best explains the corpus under a
+unigram LM. Unigram fits probabilities with EM (forward-backward over
+*all* segmentations, in log space) and segments with Viterbi to find the
+globally best split — verified against exhaustive enumeration in tests,
+and EM's likelihood is asserted to increase monotonically. On the sample
+corpus it learns `កម្ពុជា` (Cambodia) as a single token.
+
+Run the comparison with `python -m khmer_language --compare-tokenizers`:
+
+```
+tokenizer      vocab   avg_len  chars/tok  unk_rate
+character         51     30.75       1.00     0.00%
+grapheme          79     15.62       1.97     0.00%
+bpe               87     13.38       2.30     0.00%
+unigram          116      4.25       7.24     0.00%
+```
+
+**Read that table with suspicion.** It is computed on eight hand-written
+sentences, so Unigram's large compression lead is substantially
+memorization of that tiny corpus rather than a general result. The
+harness is the deliverable here; the numbers only become meaningful once
+Project 3 supplies real data.
 
 `khmer_language/embeddings/` — Word2Vec Skip-Gram with negative sampling
 (Project 5 / README section 11), written from scratch with NumPy: two
@@ -166,7 +188,7 @@ dominated by its smallest term, which is what filtering needs — a document
 is only as good as its worst dimension. Both cases are pinned as
 regression tests.
 
-248 tests in `tests/`, run with `python3 -m pytest tests/`.
+262 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for
@@ -1652,10 +1674,10 @@ BPE
 Unigram
 ```
 
-**Status: first version implemented** — `khmer_language/tokenizer/`
-(character, grapheme, syllable, grapheme-aware BPE + comparison harness).
-Unigram tokenization and training on a real corpus are not done yet
-(waiting on Project 3).
+**Status: implemented** — `khmer_language/tokenizer/` has all six
+variants (character, grapheme, syllable, word-boundary, grapheme-aware
+BPE, Unigram) plus the comparison harness. Training on a real corpus
+still waits on Project 3.
 
 ---
 

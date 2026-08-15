@@ -21,6 +21,7 @@ def _run_tokenizer_comparison(vocab_size: int) -> int:
         CharacterTokenizer,
         GraphemeTokenizer,
         SyllableTokenizer,
+        UnigramTokenizer,
         compare,
         format_comparison,
     )
@@ -32,6 +33,7 @@ def _run_tokenizer_comparison(vocab_size: int) -> int:
         "grapheme": GraphemeTokenizer(),
         "syllable": SyllableTokenizer(),
         "bpe": BPETokenizer(),
+        "unigram": UnigramTokenizer(),
     }
     stats = compare(tokenizers, list(SAMPLE_CORPUS), vocab_size=vocab_size)
     print(format_comparison(stats))
