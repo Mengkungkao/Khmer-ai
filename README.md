@@ -59,7 +59,17 @@ space-separated words. Verified to actually learn: on a corpus where ថៃ
 measurably closer to ឡាវ than to an unrelated token — across every seed
 tested, exactly the effect section 11 predicts.
 
-87 tests in `tests/`, run with `python3 -m pytest tests/`.
+`khmer_language/models/from_scratch/` — neural network primitives with
+hand-derived backward passes, NumPy only, no autograd (Project 6 /
+README section 13): `Linear`, `LayerNorm`, `GELU`, `Embedding`, stable
+`softmax`, and a fused `cross_entropy_loss`. Because a wrong gradient
+doesn't crash — it just trains badly — every backward pass is checked
+against a central finite-difference gradient (`gradcheck.py`). Those
+checks are verified to be meaningful, not vacuous: a deliberately
+sabotaged LayerNorm backward scores a relative error of 1.0 against the
+1e-6 threshold that correct math passes at 2e-9.
+
+108 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for
