@@ -84,7 +84,34 @@ relative *and* an absolute tolerance — the finite-difference estimate of a
 truly-zero gradient is pure cancellation noise (~1e-11), which no relative
 test can accept. The combined check still catches a 0.1% gradient error.
 
-146 tests in `tests/`, run with `python3 -m pytest tests/`.
+**KhmerGPT-0 exists and trains.** `models/from_scratch/gpt.py` assembles
+the above into a decoder-only LM (token + learned positional embeddings →
+N transformer blocks → final LayerNorm → linear head), with Adam,
+gradient clipping and a next-token training loop in
+`khmer_language/training/`. Run it:
+
+```bash
+python3 -m khmer_language --train-demo
+```
+
+A 112k-parameter KhmerGPT-0 on the placeholder corpus drops from loss
+**4.96 → 0.067** in 150 steps (a random-init model starts near
+ln(79)=4.37), and generates real phrases from its training data such as
+`កម្ពុជាគឺទីក្រុងភ្នំពេញ។ខ្ញុំចង់ទៅភ្នំពេញ។`. That is memorization of a
+tiny corpus, not language understanding — but it is exactly the milestone
+Project 7 asks for: proof the pipeline works end to end.
+
+Two properties are worth calling out. The model is verified to drive loss
+below 0.1 on a perfectly predictable sequence, which is the definitive
+end-to-end check that forward, backward and optimizer are all correct
+together — a subtly wrong gradient anywhere leaves it stuck well above
+that. And because the grapheme tokenizer can only emit whole Khmer
+grapheme clusters, **structural Unicode validity (section 29, Levels 1–2)
+holds by construction rather than having to be learned** — even the
+untrained model emits structurally valid Khmer, confirmed by the Project 1
+validator.
+
+177 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for
@@ -1581,11 +1608,18 @@ Train embeddings and visualize them.
 
 Use the w3cj project as the educational reference.
 
+**Status: implemented** — `models/from_scratch/` (layers, attention,
+transformer block, optimizer), every backward pass gradient-checked.
+
 ---
 
 ### Project 7 — KhmerGPT-0
 
 Train the first Khmer language model.
+
+**Status: implemented** — `models/from_scratch/gpt.py` +
+`khmer_language/training/`. Trains end to end on the placeholder corpus
+(`--train-demo`). Training on a real corpus awaits Project 3.
 
 ---
 

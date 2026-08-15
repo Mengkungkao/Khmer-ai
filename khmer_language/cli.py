@@ -38,6 +38,39 @@ def _run_tokenizer_comparison(vocab_size: int) -> int:
     return 0
 
 
+def _run_train_demo(steps: int) -> int:
+    """Train KhmerGPT-0 on the sample corpus and show what it generates."""
+    import numpy as np
+
+    from .models.from_scratch.gpt import GPTConfig, KhmerGPT
+    from .tokenizer import SAMPLE_CORPUS, GraphemeTokenizer
+    from .training import encode_corpus, train
+    from .unicode.validator import is_valid
+
+    tokenizer = GraphemeTokenizer()
+    tokenizer.train(list(SAMPLE_CORPUS))
+    data = encode_corpus(tokenizer, list(SAMPLE_CORPUS))
+
+    config = GPTConfig(vocab_size=len(tokenizer.vocab), dim=64, num_layers=2, num_heads=2, max_seq_len=32)
+    model = KhmerGPT(config, seed=0)
+
+    print(f"corpus:  {len(data)} tokens, vocab {len(tokenizer.vocab)} (placeholder SAMPLE_CORPUS)")
+    print(f"model:   KhmerGPT-0, {model.num_parameters():,} parameters")
+    print(f"a random-init model should start near ln(vocab) = {np.log(len(tokenizer.vocab)):.3f}\n")
+
+    report = train(model, data, steps=steps, batch_size=8, seq_len=16, lr=3e-3, seed=0,
+                   log_every=max(1, steps // 5))
+
+    print(f"\nloss {report.losses[0]:.3f} -> {report.final_loss:.3f}")
+    sample = tokenizer.decode(
+        model.generate(list(data[:3]), max_new_tokens=25, temperature=0.8,
+                       rng=np.random.default_rng(7))
+    )
+    print(f"\nsample: {sample}")
+    print(f"structurally valid Khmer: {is_valid(sample)}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
 
@@ -60,7 +93,19 @@ def main(argv: list[str] | None = None) -> int:
         metavar="VOCAB_SIZE",
         help="train character/grapheme/syllable/BPE tokenizers on the sample corpus and compare them",
     )
+    parser.add_argument(
+        "--train-demo",
+        nargs="?",
+        const=150,
+        type=int,
+        default=None,
+        metavar="STEPS",
+        help="train KhmerGPT-0 on the sample corpus and generate a sample",
+    )
     args = parser.parse_args(argv)
+
+    if args.train_demo is not None:
+        return _run_train_demo(args.train_demo)
 
     if args.export_db is not None:
         export_json(args.export_db)
