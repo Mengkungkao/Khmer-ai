@@ -1,0 +1,1127 @@
+{
+  "consonants": [
+    {
+      "codepoint": 6016,
+      "name": "KA",
+      "series": "a",
+      "romanization": "k",
+      "ipa": "k",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1780",
+      "char": "ក",
+      "subscript_form": "្ក"
+    },
+    {
+      "codepoint": 6017,
+      "name": "KHA",
+      "series": "a",
+      "romanization": "kh",
+      "ipa": "kʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1781",
+      "char": "ខ",
+      "subscript_form": "្ខ"
+    },
+    {
+      "codepoint": 6018,
+      "name": "KO",
+      "series": "o",
+      "romanization": "k",
+      "ipa": "k",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1782",
+      "char": "គ",
+      "subscript_form": "្គ"
+    },
+    {
+      "codepoint": 6019,
+      "name": "KHO",
+      "series": "o",
+      "romanization": "kh",
+      "ipa": "kʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1783",
+      "char": "ឃ",
+      "subscript_form": "្ឃ"
+    },
+    {
+      "codepoint": 6020,
+      "name": "NGO",
+      "series": "o",
+      "romanization": "ng",
+      "ipa": "ŋ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1784",
+      "char": "ង",
+      "subscript_form": "្ង"
+    },
+    {
+      "codepoint": 6021,
+      "name": "CA",
+      "series": "a",
+      "romanization": "ch",
+      "ipa": "c",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1785",
+      "char": "ច",
+      "subscript_form": "្ច"
+    },
+    {
+      "codepoint": 6022,
+      "name": "CHA",
+      "series": "a",
+      "romanization": "chh",
+      "ipa": "cʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1786",
+      "char": "ឆ",
+      "subscript_form": "្ឆ"
+    },
+    {
+      "codepoint": 6023,
+      "name": "CO",
+      "series": "o",
+      "romanization": "ch",
+      "ipa": "c",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1787",
+      "char": "ជ",
+      "subscript_form": "្ជ"
+    },
+    {
+      "codepoint": 6024,
+      "name": "CHO",
+      "series": "o",
+      "romanization": "chh",
+      "ipa": "cʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1788",
+      "char": "ឈ",
+      "subscript_form": "្ឈ"
+    },
+    {
+      "codepoint": 6025,
+      "name": "NYO",
+      "series": "o",
+      "romanization": "nh",
+      "ipa": "ɲ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1789",
+      "char": "ញ",
+      "subscript_form": "្ញ"
+    },
+    {
+      "codepoint": 6026,
+      "name": "DA",
+      "series": "a",
+      "romanization": "d",
+      "ipa": "ɗ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+178A",
+      "char": "ដ",
+      "subscript_form": "្ដ"
+    },
+    {
+      "codepoint": 6027,
+      "name": "TTHA",
+      "series": "a",
+      "romanization": "th",
+      "ipa": "tʰ",
+      "obsolete": false,
+      "note": "rare, mostly Pali/Sanskrit loanwords",
+      "codepoint_hex": "U+178B",
+      "char": "ឋ",
+      "subscript_form": "្ឋ"
+    },
+    {
+      "codepoint": 6028,
+      "name": "DO",
+      "series": "o",
+      "romanization": "d",
+      "ipa": "ɗ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+178C",
+      "char": "ឌ",
+      "subscript_form": "្ឌ"
+    },
+    {
+      "codepoint": 6029,
+      "name": "TTHO",
+      "series": "o",
+      "romanization": "th",
+      "ipa": "tʰ",
+      "obsolete": false,
+      "note": "rare, mostly Pali/Sanskrit loanwords",
+      "codepoint_hex": "U+178D",
+      "char": "ឍ",
+      "subscript_form": "្ឍ"
+    },
+    {
+      "codepoint": 6030,
+      "name": "NNO",
+      "series": "a",
+      "romanization": "n",
+      "ipa": "n",
+      "obsolete": false,
+      "note": "exception: a-series despite being the row-5 nasal",
+      "codepoint_hex": "U+178E",
+      "char": "ណ",
+      "subscript_form": "្ណ"
+    },
+    {
+      "codepoint": 6031,
+      "name": "TA",
+      "series": "a",
+      "romanization": "t",
+      "ipa": "t",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+178F",
+      "char": "ត",
+      "subscript_form": "្ត"
+    },
+    {
+      "codepoint": 6032,
+      "name": "THA",
+      "series": "a",
+      "romanization": "th",
+      "ipa": "tʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1790",
+      "char": "ថ",
+      "subscript_form": "្ថ"
+    },
+    {
+      "codepoint": 6033,
+      "name": "TO",
+      "series": "o",
+      "romanization": "t",
+      "ipa": "t",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1791",
+      "char": "ទ",
+      "subscript_form": "្ទ"
+    },
+    {
+      "codepoint": 6034,
+      "name": "THO",
+      "series": "o",
+      "romanization": "th",
+      "ipa": "tʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1792",
+      "char": "ធ",
+      "subscript_form": "្ធ"
+    },
+    {
+      "codepoint": 6035,
+      "name": "NO",
+      "series": "o",
+      "romanization": "n",
+      "ipa": "n",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1793",
+      "char": "ន",
+      "subscript_form": "្ន"
+    },
+    {
+      "codepoint": 6036,
+      "name": "BA",
+      "series": "a",
+      "romanization": "b/p",
+      "ipa": "ɓ/p",
+      "obsolete": false,
+      "note": "pronounced p in final position",
+      "codepoint_hex": "U+1794",
+      "char": "ប",
+      "subscript_form": "្ប"
+    },
+    {
+      "codepoint": 6037,
+      "name": "PHA",
+      "series": "a",
+      "romanization": "ph",
+      "ipa": "pʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1795",
+      "char": "ផ",
+      "subscript_form": "្ផ"
+    },
+    {
+      "codepoint": 6038,
+      "name": "PO",
+      "series": "o",
+      "romanization": "p",
+      "ipa": "p",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1796",
+      "char": "ព",
+      "subscript_form": "្ព"
+    },
+    {
+      "codepoint": 6039,
+      "name": "PHO",
+      "series": "o",
+      "romanization": "ph",
+      "ipa": "pʰ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1797",
+      "char": "ភ",
+      "subscript_form": "្ភ"
+    },
+    {
+      "codepoint": 6040,
+      "name": "MO",
+      "series": "o",
+      "romanization": "m",
+      "ipa": "m",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1798",
+      "char": "ម",
+      "subscript_form": "្ម"
+    },
+    {
+      "codepoint": 6041,
+      "name": "YO",
+      "series": "o",
+      "romanization": "y",
+      "ipa": "j",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+1799",
+      "char": "យ",
+      "subscript_form": "្យ"
+    },
+    {
+      "codepoint": 6042,
+      "name": "RO",
+      "series": "o",
+      "romanization": "r",
+      "ipa": "r",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+179A",
+      "char": "រ",
+      "subscript_form": "្រ"
+    },
+    {
+      "codepoint": 6043,
+      "name": "LO",
+      "series": "o",
+      "romanization": "l",
+      "ipa": "l",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+179B",
+      "char": "ល",
+      "subscript_form": "្ល"
+    },
+    {
+      "codepoint": 6044,
+      "name": "VO",
+      "series": "o",
+      "romanization": "v",
+      "ipa": "ʋ",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+179C",
+      "char": "វ",
+      "subscript_form": "្វ"
+    },
+    {
+      "codepoint": 6045,
+      "name": "SHA",
+      "series": "a",
+      "romanization": "ś",
+      "ipa": "ɕ",
+      "obsolete": true,
+      "note": "obsolete, Sanskrit transliteration only",
+      "codepoint_hex": "U+179D",
+      "char": "ឝ",
+      "subscript_form": "្ឝ"
+    },
+    {
+      "codepoint": 6046,
+      "name": "SSO",
+      "series": "a",
+      "romanization": "ṣ",
+      "ipa": "ʂ",
+      "obsolete": true,
+      "note": "obsolete, Sanskrit transliteration only",
+      "codepoint_hex": "U+179E",
+      "char": "ឞ",
+      "subscript_form": "្ឞ"
+    },
+    {
+      "codepoint": 6047,
+      "name": "SA",
+      "series": "a",
+      "romanization": "s",
+      "ipa": "s",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+179F",
+      "char": "ស",
+      "subscript_form": "្ស"
+    },
+    {
+      "codepoint": 6048,
+      "name": "HA",
+      "series": "a",
+      "romanization": "h",
+      "ipa": "h",
+      "obsolete": false,
+      "note": "",
+      "codepoint_hex": "U+17A0",
+      "char": "ហ",
+      "subscript_form": "្ហ"
+    },
+    {
+      "codepoint": 6049,
+      "name": "LA",
+      "series": "o",
+      "romanization": "l",
+      "ipa": "l",
+      "obsolete": false,
+      "note": "exception: o-series; has no subscript form",
+      "codepoint_hex": "U+17A1",
+      "char": "ឡ",
+      "subscript_form": "្ឡ"
+    },
+    {
+      "codepoint": 6050,
+      "name": "QA",
+      "series": "a",
+      "romanization": "'",
+      "ipa": "ʔ",
+      "obsolete": false,
+      "note": "glottal stop; also used as a null/vowel-carrying initial",
+      "codepoint_hex": "U+17A2",
+      "char": "អ",
+      "subscript_form": "្អ"
+    }
+  ],
+  "independent_vowels": [
+    {
+      "codepoint": 6051,
+      "name": "QAQ",
+      "romanization": null,
+      "ipa": null,
+      "note": "rare/legacy in modern Khmer orthography",
+      "codepoint_hex": "U+17A3",
+      "char": "ឣ"
+    },
+    {
+      "codepoint": 6052,
+      "name": "QAA",
+      "romanization": null,
+      "ipa": null,
+      "note": "rare/legacy in modern Khmer orthography",
+      "codepoint_hex": "U+17A4",
+      "char": "ឤ"
+    },
+    {
+      "codepoint": 6053,
+      "name": "QI",
+      "romanization": "ĕ",
+      "ipa": "ʔə~ʔɨ~ʔəj",
+      "note": "",
+      "codepoint_hex": "U+17A5",
+      "char": "ឥ"
+    },
+    {
+      "codepoint": 6054,
+      "name": "QII",
+      "romanization": "ei",
+      "ipa": "ʔəj",
+      "note": "",
+      "codepoint_hex": "U+17A6",
+      "char": "ឦ"
+    },
+    {
+      "codepoint": 6055,
+      "name": "QU",
+      "romanization": "ŏ/ŭ",
+      "ipa": "ʔo~ʔu~ʔao",
+      "note": "",
+      "codepoint_hex": "U+17A7",
+      "char": "ឧ"
+    },
+    {
+      "codepoint": 6056,
+      "name": "QUK",
+      "romanization": null,
+      "ipa": null,
+      "note": "uncommon; verify against a dedicated reference",
+      "codepoint_hex": "U+17A8",
+      "char": "ឨ"
+    },
+    {
+      "codepoint": 6057,
+      "name": "QUU",
+      "romanization": null,
+      "ipa": null,
+      "note": "uncommon; verify against a dedicated reference",
+      "codepoint_hex": "U+17A9",
+      "char": "ឩ"
+    },
+    {
+      "codepoint": 6058,
+      "name": "QUUV",
+      "romanization": "âu",
+      "ipa": "ʔəw",
+      "note": "moderate confidence",
+      "codepoint_hex": "U+17AA",
+      "char": "ឪ"
+    },
+    {
+      "codepoint": 6059,
+      "name": "RY",
+      "romanization": "rœ̆",
+      "ipa": "rɨ",
+      "note": "",
+      "codepoint_hex": "U+17AB",
+      "char": "ឫ"
+    },
+    {
+      "codepoint": 6060,
+      "name": "RYY",
+      "romanization": "rœ",
+      "ipa": "rɨː",
+      "note": "",
+      "codepoint_hex": "U+17AC",
+      "char": "ឬ"
+    },
+    {
+      "codepoint": 6061,
+      "name": "LY",
+      "romanization": "lœ̆",
+      "ipa": "lɨ",
+      "note": "",
+      "codepoint_hex": "U+17AD",
+      "char": "ឭ"
+    },
+    {
+      "codepoint": 6062,
+      "name": "LYY",
+      "romanization": "lœ",
+      "ipa": "lɨː",
+      "note": "",
+      "codepoint_hex": "U+17AE",
+      "char": "ឮ"
+    },
+    {
+      "codepoint": 6063,
+      "name": "QE",
+      "romanization": "ê",
+      "ipa": "ʔae~ʔɛː~ʔeː",
+      "note": "",
+      "codepoint_hex": "U+17AF",
+      "char": "ឯ"
+    },
+    {
+      "codepoint": 6064,
+      "name": "QAI",
+      "romanization": "ai",
+      "ipa": "ʔaj",
+      "note": "",
+      "codepoint_hex": "U+17B0",
+      "char": "ឰ"
+    },
+    {
+      "codepoint": 6065,
+      "name": "QOO TYPE ONE",
+      "romanization": "aô",
+      "ipa": "ʔao",
+      "note": "",
+      "codepoint_hex": "U+17B1",
+      "char": "ឱ"
+    },
+    {
+      "codepoint": 6066,
+      "name": "QOO TYPE TWO",
+      "romanization": "aô",
+      "ipa": "ʔao",
+      "note": "stylistic variant of QOO TYPE ONE",
+      "codepoint_hex": "U+17B2",
+      "char": "ឲ"
+    },
+    {
+      "codepoint": 6067,
+      "name": "QAU",
+      "romanization": "au",
+      "ipa": "ʔaw",
+      "note": "",
+      "codepoint_hex": "U+17B3",
+      "char": "ឳ"
+    }
+  ],
+  "inherent_vowels": [
+    {
+      "codepoint": 6068,
+      "codepoint_hex": "U+17B4",
+      "char": "឴"
+    },
+    {
+      "codepoint": 6069,
+      "codepoint_hex": "U+17B5",
+      "char": "឵"
+    }
+  ],
+  "dependent_vowels": [
+    {
+      "codepoint": 6070,
+      "name": "AA",
+      "visual_position": "right",
+      "a_series_ipa": "aː",
+      "a_series_romanization": "a",
+      "o_series_ipa": "iːə",
+      "o_series_romanization": "éa",
+      "codepoint_hex": "U+17B6",
+      "char": "ា"
+    },
+    {
+      "codepoint": 6071,
+      "name": "I",
+      "visual_position": "above",
+      "a_series_ipa": "ə",
+      "a_series_romanization": "ĕ",
+      "o_series_ipa": "ɨ~i",
+      "o_series_romanization": "ĭ",
+      "codepoint_hex": "U+17B7",
+      "char": "ិ"
+    },
+    {
+      "codepoint": 6072,
+      "name": "II",
+      "visual_position": "above",
+      "a_series_ipa": "ej",
+      "a_series_romanization": "ei",
+      "o_series_ipa": "iː",
+      "o_series_romanization": "i",
+      "codepoint_hex": "U+17B8",
+      "char": "ី"
+    },
+    {
+      "codepoint": 6073,
+      "name": "Y",
+      "visual_position": "above",
+      "a_series_ipa": "ə",
+      "a_series_romanization": "œ̆",
+      "o_series_ipa": "ɨ",
+      "o_series_romanization": "ẏ",
+      "codepoint_hex": "U+17B9",
+      "char": "ឹ"
+    },
+    {
+      "codepoint": 6074,
+      "name": "YY",
+      "visual_position": "above",
+      "a_series_ipa": "əː",
+      "a_series_romanization": "œ",
+      "o_series_ipa": "ɨː",
+      "o_series_romanization": "ȳ",
+      "codepoint_hex": "U+17BA",
+      "char": "ឺ"
+    },
+    {
+      "codepoint": 6075,
+      "name": "U",
+      "visual_position": "below",
+      "a_series_ipa": "o",
+      "a_series_romanization": "ŏ",
+      "o_series_ipa": "u",
+      "o_series_romanization": "ŭ",
+      "codepoint_hex": "U+17BB",
+      "char": "ុ"
+    },
+    {
+      "codepoint": 6076,
+      "name": "UU",
+      "visual_position": "below",
+      "a_series_ipa": "oː",
+      "a_series_romanization": "o",
+      "o_series_ipa": "uː",
+      "o_series_romanization": "u",
+      "codepoint_hex": "U+17BC",
+      "char": "ូ"
+    },
+    {
+      "codepoint": 6077,
+      "name": "UA",
+      "visual_position": "below-right",
+      "a_series_ipa": "uə",
+      "a_series_romanization": "uŏ",
+      "o_series_ipa": null,
+      "o_series_romanization": null,
+      "codepoint_hex": "U+17BD",
+      "char": "ួ"
+    },
+    {
+      "codepoint": 6078,
+      "name": "OE",
+      "visual_position": "right",
+      "a_series_ipa": "aə",
+      "a_series_romanization": "aeu",
+      "o_series_ipa": "əː",
+      "o_series_romanization": "eu",
+      "codepoint_hex": "U+17BE",
+      "char": "ើ"
+    },
+    {
+      "codepoint": 6079,
+      "name": "YA",
+      "visual_position": "right",
+      "a_series_ipa": "ɨə",
+      "a_series_romanization": "œă",
+      "o_series_ipa": null,
+      "o_series_romanization": null,
+      "codepoint_hex": "U+17BF",
+      "char": "ឿ"
+    },
+    {
+      "codepoint": 6080,
+      "name": "IE",
+      "visual_position": "right",
+      "a_series_ipa": "iə",
+      "a_series_romanization": "iĕ",
+      "o_series_ipa": null,
+      "o_series_romanization": null,
+      "codepoint_hex": "U+17C0",
+      "char": "ៀ"
+    },
+    {
+      "codepoint": 6081,
+      "name": "E",
+      "visual_position": "left",
+      "a_series_ipa": "eː",
+      "a_series_romanization": "é",
+      "o_series_ipa": null,
+      "o_series_romanization": null,
+      "codepoint_hex": "U+17C1",
+      "char": "េ"
+    },
+    {
+      "codepoint": 6082,
+      "name": "AE",
+      "visual_position": "left",
+      "a_series_ipa": "ae",
+      "a_series_romanization": "ê",
+      "o_series_ipa": "ɛː",
+      "o_series_romanization": "ae",
+      "codepoint_hex": "U+17C2",
+      "char": "ែ"
+    },
+    {
+      "codepoint": 6083,
+      "name": "AI",
+      "visual_position": "left",
+      "a_series_ipa": "ej",
+      "a_series_romanization": "ai",
+      "o_series_ipa": "aj",
+      "o_series_romanization": "ey",
+      "codepoint_hex": "U+17C3",
+      "char": "ៃ"
+    },
+    {
+      "codepoint": 6084,
+      "name": "OO",
+      "visual_position": "left-right",
+      "a_series_ipa": "ao",
+      "a_series_romanization": "aô",
+      "o_series_ipa": "oː",
+      "o_series_romanization": "oŭ",
+      "codepoint_hex": "U+17C4",
+      "char": "ោ"
+    },
+    {
+      "codepoint": 6085,
+      "name": "AU",
+      "visual_position": "right",
+      "a_series_ipa": "aɨ",
+      "a_series_romanization": "au",
+      "o_series_ipa": "əɨ",
+      "o_series_romanization": "ŏu",
+      "codepoint_hex": "U+17C5",
+      "char": "ៅ"
+    }
+  ],
+  "signs": [
+    {
+      "codepoint": 6086,
+      "name": "NIKAHIT",
+      "kind": "SIGN",
+      "note": "final nasalization; also used as a vowel component in some words",
+      "codepoint_hex": "U+17C6",
+      "char": "ំ"
+    },
+    {
+      "codepoint": 6087,
+      "name": "REAHMUK",
+      "kind": "SIGN",
+      "note": "adds a final aspiration-like -h quality",
+      "codepoint_hex": "U+17C7",
+      "char": "ះ"
+    },
+    {
+      "codepoint": 6088,
+      "name": "YUUKALEAPINTU",
+      "kind": "SIGN",
+      "note": "rare sign marking a specific vowel-length reading",
+      "codepoint_hex": "U+17C8",
+      "char": "ៈ"
+    },
+    {
+      "codepoint": 6089,
+      "name": "MUUSIKATOAN",
+      "kind": "REGISTER_SHIFTER",
+      "note": "shifts an a-series consonant to read with o-series vowel quality",
+      "codepoint_hex": "U+17C9",
+      "char": "៉"
+    },
+    {
+      "codepoint": 6090,
+      "name": "TRIISAP",
+      "kind": "REGISTER_SHIFTER",
+      "note": "shifts an o-series consonant to read with a-series vowel quality",
+      "codepoint_hex": "U+17CA",
+      "char": "៊"
+    },
+    {
+      "codepoint": 6091,
+      "name": "BANTOC",
+      "kind": "SIGN",
+      "note": "shortens the vowel of the syllable",
+      "codepoint_hex": "U+17CB",
+      "char": "់"
+    },
+    {
+      "codepoint": 6092,
+      "name": "ROBAT",
+      "kind": "SIGN",
+      "note": "marks a historical preceding r-, written above the consonant",
+      "codepoint_hex": "U+17CC",
+      "char": "៌"
+    },
+    {
+      "codepoint": 6093,
+      "name": "TOANDAKHIAT",
+      "kind": "SIGN",
+      "note": "commonly called 'asat'; cancels/silences the inherent vowel of the consonant it attaches to",
+      "codepoint_hex": "U+17CD",
+      "char": "៍"
+    },
+    {
+      "codepoint": 6094,
+      "name": "KAKABAT",
+      "kind": "SIGN",
+      "note": "rare repetition/emphasis mark",
+      "codepoint_hex": "U+17CE",
+      "char": "៎"
+    },
+    {
+      "codepoint": 6095,
+      "name": "AHSDA",
+      "kind": "SIGN",
+      "note": "rare sign",
+      "codepoint_hex": "U+17CF",
+      "char": "៏"
+    },
+    {
+      "codepoint": 6096,
+      "name": "SAMYOK SANNYA",
+      "kind": "SIGN",
+      "note": "rare ligature-like sign used in a few fixed words",
+      "codepoint_hex": "U+17D0",
+      "char": "័"
+    },
+    {
+      "codepoint": 6097,
+      "name": "VIRIAM",
+      "kind": "SIGN",
+      "note": "rare; marks a consonant as unpronounced, largely unused in modern Khmer",
+      "codepoint_hex": "U+17D1",
+      "char": "៑"
+    },
+    {
+      "codepoint": 6098,
+      "name": "COENG",
+      "kind": "COENG",
+      "note": "the subscript-forming sign: COENG + consonant renders that consonant as a subscript",
+      "codepoint_hex": "U+17D2",
+      "char": "្"
+    },
+    {
+      "codepoint": 6099,
+      "name": "BATHAMASAT",
+      "kind": "SIGN",
+      "note": "rare diacritic",
+      "codepoint_hex": "U+17D3",
+      "char": "៓"
+    },
+    {
+      "codepoint": 6100,
+      "name": "KHAN",
+      "kind": "PUNCTUATION",
+      "note": "clause/sentence-final punctuation, similar role to a period",
+      "codepoint_hex": "U+17D4",
+      "char": "។"
+    },
+    {
+      "codepoint": 6101,
+      "name": "BARIYOOSAN",
+      "kind": "PUNCTUATION",
+      "note": "section/paragraph end marker",
+      "codepoint_hex": "U+17D5",
+      "char": "៕"
+    },
+    {
+      "codepoint": 6102,
+      "name": "CAMNUC PII KUUH",
+      "kind": "PUNCTUATION",
+      "note": "repetition sign: repeat the preceding word",
+      "codepoint_hex": "U+17D6",
+      "char": "៖"
+    },
+    {
+      "codepoint": 6103,
+      "name": "LEK TOO",
+      "kind": "PUNCTUATION",
+      "note": "rare sign, historically used as a multiplier in numeral notation",
+      "codepoint_hex": "U+17D7",
+      "char": "ៗ"
+    },
+    {
+      "codepoint": 6104,
+      "name": "BEYYAL",
+      "kind": "PUNCTUATION",
+      "note": "enumeration mark, historically similar in use to 'etc.'",
+      "codepoint_hex": "U+17D8",
+      "char": "៘"
+    },
+    {
+      "codepoint": 6105,
+      "name": "PHNAEK MUAN",
+      "kind": "PUNCTUATION",
+      "note": "decorative section marker used in older/ceremonial texts",
+      "codepoint_hex": "U+17D9",
+      "char": "៙"
+    },
+    {
+      "codepoint": 6106,
+      "name": "KOOMUUT",
+      "kind": "PUNCTUATION",
+      "note": "decorative text-end marker used in older/literary texts",
+      "codepoint_hex": "U+17DA",
+      "char": "៚"
+    },
+    {
+      "codepoint": 6107,
+      "name": "RIEL SIGN",
+      "kind": "CURRENCY",
+      "note": "Cambodian riel currency symbol",
+      "codepoint_hex": "U+17DB",
+      "char": "៛"
+    },
+    {
+      "codepoint": 6108,
+      "name": "AVAKRAHASANYA",
+      "kind": "OTHER",
+      "note": "rare letter-like sign, lengthens an initial vowel in a few words",
+      "codepoint_hex": "U+17DC",
+      "char": "ៜ"
+    },
+    {
+      "codepoint": 6109,
+      "name": "ATTHACAN",
+      "kind": "SIGN",
+      "note": "rare diacritic, drawn as a small circle above",
+      "codepoint_hex": "U+17DD",
+      "char": "៝"
+    }
+  ],
+  "digits": [
+    {
+      "codepoint": 6112,
+      "name": "ZERO",
+      "value": 0,
+      "note": "",
+      "codepoint_hex": "U+17E0",
+      "char": "០"
+    },
+    {
+      "codepoint": 6113,
+      "name": "ONE",
+      "value": 1,
+      "note": "",
+      "codepoint_hex": "U+17E1",
+      "char": "១"
+    },
+    {
+      "codepoint": 6114,
+      "name": "TWO",
+      "value": 2,
+      "note": "",
+      "codepoint_hex": "U+17E2",
+      "char": "២"
+    },
+    {
+      "codepoint": 6115,
+      "name": "THREE",
+      "value": 3,
+      "note": "",
+      "codepoint_hex": "U+17E3",
+      "char": "៣"
+    },
+    {
+      "codepoint": 6116,
+      "name": "FOUR",
+      "value": 4,
+      "note": "",
+      "codepoint_hex": "U+17E4",
+      "char": "៤"
+    },
+    {
+      "codepoint": 6117,
+      "name": "FIVE",
+      "value": 5,
+      "note": "",
+      "codepoint_hex": "U+17E5",
+      "char": "៥"
+    },
+    {
+      "codepoint": 6118,
+      "name": "SIX",
+      "value": 6,
+      "note": "",
+      "codepoint_hex": "U+17E6",
+      "char": "៦"
+    },
+    {
+      "codepoint": 6119,
+      "name": "SEVEN",
+      "value": 7,
+      "note": "",
+      "codepoint_hex": "U+17E7",
+      "char": "៧"
+    },
+    {
+      "codepoint": 6120,
+      "name": "EIGHT",
+      "value": 8,
+      "note": "",
+      "codepoint_hex": "U+17E8",
+      "char": "៨"
+    },
+    {
+      "codepoint": 6121,
+      "name": "NINE",
+      "value": 9,
+      "note": "",
+      "codepoint_hex": "U+17E9",
+      "char": "៩"
+    }
+  ],
+  "lek_attak": [
+    {
+      "codepoint": 6128,
+      "name": "LEK ATTAK SON",
+      "value": 0,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F0",
+      "char": "៰"
+    },
+    {
+      "codepoint": 6129,
+      "name": "LEK ATTAK MUOY",
+      "value": 1,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F1",
+      "char": "៱"
+    },
+    {
+      "codepoint": 6130,
+      "name": "LEK ATTAK PII",
+      "value": 2,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F2",
+      "char": "៲"
+    },
+    {
+      "codepoint": 6131,
+      "name": "LEK ATTAK BEI",
+      "value": 3,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F3",
+      "char": "៳"
+    },
+    {
+      "codepoint": 6132,
+      "name": "LEK ATTAK BUON",
+      "value": 4,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F4",
+      "char": "៴"
+    },
+    {
+      "codepoint": 6133,
+      "name": "LEK ATTAK PRAM",
+      "value": 5,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F5",
+      "char": "៵"
+    },
+    {
+      "codepoint": 6134,
+      "name": "LEK ATTAK PRAM-MUOY",
+      "value": 6,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F6",
+      "char": "៶"
+    },
+    {
+      "codepoint": 6135,
+      "name": "LEK ATTAK PRAM-PII",
+      "value": 7,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F7",
+      "char": "៷"
+    },
+    {
+      "codepoint": 6136,
+      "name": "LEK ATTAK PRAM-BEI",
+      "value": 8,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F8",
+      "char": "៸"
+    },
+    {
+      "codepoint": 6137,
+      "name": "LEK ATTAK PRAM-BUON",
+      "value": 9,
+      "note": "alternate/formal numeral symbol set",
+      "codepoint_hex": "U+17F9",
+      "char": "៹"
+    }
+  ]
+}
