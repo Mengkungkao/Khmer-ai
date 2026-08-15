@@ -2,7 +2,8 @@
 
 ## Status
 
-**Project 1 — Khmer Unicode & Grapheme Engine is implemented** in
+**Project 1 — Khmer Unicode & Grapheme Engine is implemented**, and
+**Project 4 — Tokenizer Lab has a first version**, both in
 [`khmer_language/`](khmer_language/). Everything else in this document is
 the roadmap, not yet built.
 
@@ -37,7 +38,18 @@ What exists today, with no third-party dependencies (stdlib only):
 - `transliterator.py` — best-effort Khmer→Latin transliteration.
 - `analyzer.py` + `cli.py` — ties it together: `python -m khmer_language "កម្ពុជា"`.
 
-46 tests in `tests/`, run with `python3 -m pytest tests/`.
+`khmer_language/tokenizer/` — the Tokenizer Lab (Project 4 / README
+section 10): `CharacterTokenizer`, `GraphemeTokenizer`, `SyllableTokenizer`,
+and a grapheme-aware `BPETokenizer` (merges start from Khmer grapheme
+clusters, not raw code points, so a learned token can never split a
+COENG subscript from its base). All share a common vocab/encode/decode
+interface (`tokenizer/base.py`). `tokenizer/compare.py` reports
+vocab size / sequence length / compression ratio / unknown-token rate
+side by side — run it with `python -m khmer_language --compare-tokenizers`.
+There is no real Khmer corpus yet (Project 3, not started), so training
+uses a small placeholder `SAMPLE_CORPUS`.
+
+75 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for
@@ -1508,6 +1520,11 @@ word
 BPE
 Unigram
 ```
+
+**Status: first version implemented** — `khmer_language/tokenizer/`
+(character, grapheme, syllable, grapheme-aware BPE + comparison harness).
+Unigram tokenization and training on a real corpus are not done yet
+(waiting on Project 3).
 
 ---
 
