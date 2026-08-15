@@ -9,7 +9,7 @@ trained language model, in [`khmer_language/`](khmer_language/):
 |---|---|
 | 1 — Khmer Unicode & grapheme engine | ✅ done |
 | 2 — Grapheme & syllable parser | ✅ done |
-| 3 — **Khmer corpus** | ❌ **not started — the blocker** |
+| 3 — Khmer corpus | ⚠️ pipeline done, **no data yet — the blocker** |
 | 4 — Tokenizer lab | ✅ done (Unigram pending) |
 | 5 — Word2Vec | ✅ done |
 | 6 — Transformer from scratch | ✅ done |
@@ -143,7 +143,30 @@ computable without the dictionary (§8) or a judge model. Those report
 implemented` — a fake "Naturalness: 0.91" would make the model look
 evaluated when it isn't, which is the exact failure §18 exists to prevent.
 
-208 tests in `tests/`, run with `python3 -m pytest tests/`.
+`khmer_language/corpus/` — the corpus pipeline (§6–7): licence
+enforcement, exact + MinHash near-duplicate detection, script-based
+language ID, quality scoring, sentence extraction, JSONL I/O. Every stage
+records what it dropped and why, so a corpus shrinking from 100k to 3k
+documents is debuggable.
+
+**Collection is deliberately not implemented.** Fetching Khmer text
+involves licensing, robots.txt and provenance decisions that belong to the
+project owner, not to a general-purpose function. The pipeline processes
+documents that already exist, so it works identically whatever the source.
+`Document` also *requires* a licence field rather than defaulting it —
+metadata not captured at ingestion can't be reconstructed once a model has
+trained on the text.
+
+Quality scoring uses a weighted **geometric** mean, after an arithmetic
+mean failed twice on real inputs: English text scored 0.71 (its
+`unicode`/`markup` components are *vacuously* perfect when there's no
+Khmer to be malformed), and spam repeating one word 80 times scored 0.605
+and passed a 0.6 filter despite `repetition` = 0.013. A geometric mean is
+dominated by its smallest term, which is what filtering needs — a document
+is only as good as its worst dimension. Both cases are pinned as
+regression tests.
+
+248 tests in `tests/`, run with `python3 -m pytest tests/`.
 
 [`fonts/`](fonts/) has Noto Serif Khmer and Noto Sans Khmer (SIL OFL,
 bundled from [google/fonts](https://github.com/google/fonts)) for
@@ -1607,6 +1630,12 @@ normalize
 deduplicate
 validate
 ```
+
+**Status: pipeline implemented, no data yet** — `khmer_language/corpus/`
+does clean/normalize/deduplicate/validate/quality-score/license-check.
+`collect` is intentionally left to a human decision: which Khmer sources
+to use, under which licences, is a provenance question rather than a
+coding one. This is the blocker on every remaining milestone.
 
 ---
 
