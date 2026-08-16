@@ -14,8 +14,9 @@ trained language model, in [`khmer_language/`](khmer_language/):
 | 5 — Word2Vec | ✅ done |
 | 6 — Transformer from scratch | ✅ done |
 | 7 — KhmerGPT-0 | ✅ trains on real Khmer Wikipedia |
-| 8 — KhmerGPT-Instruct | ❌ needs a corpus |
-| 9–10 — Chatbot, voice | ❌ not started |
+| 8 — KhmerGPT-Instruct | ✅ works; needs more instruction data |
+| 9 — Chat interface | ✅ `scripts/chat.py` |
+| 10 — Voice (ASR/TTS) | ❌ not started |
 
 Real Khmer text now flows through the whole stack. The Khmer Wikipedia dump
 (16,775 articles) processes down to a clean corpus:
@@ -155,22 +156,29 @@ gradient clipping and a next-token training loop in
 python3 -m khmer_language --train-demo
 ```
 
-A 112k-parameter KhmerGPT-0 on the placeholder corpus drops from loss
-**4.96 → 0.067** in 150 steps (a random-init model starts near
-ln(79)=4.37), and generates real phrases from its training data such as
-`កម្ពុជាគឺទីក្រុងភ្នំពេញ។ខ្ញុំចង់ទៅភ្នំពេញ។`. That is memorization of a
-tiny corpus, not language understanding — but it is exactly the milestone
-Project 7 asks for: proof the pipeline works end to end.
+**KhmerGPT trained on real Khmer Wikipedia.** Two generations, measured
+on held-out documents the model never trained on:
 
-Two properties are worth calling out. The model is verified to drive loss
-below 0.1 on a perfectly predictable sequence, which is the definitive
-end-to-end check that forward, backward and optimizer are all correct
-together — a subtly wrong gradient anywhere leaves it stuck well above
-that. And because the grapheme tokenizer can only emit whole Khmer
-grapheme clusters, **structural Unicode validity (section 29, Levels 1–2)
-holds by construction rather than having to be learned** — even the
-untrained model emits structurally valid Khmer, confirmed by the Project 1
-validator.
+| | v1 | v2 |
+|---|---|---|
+| parameters | 1.44M | **925k** (weight tying) |
+| held-out perplexity | 40.5 | **18.4** |
+| held-out loss | 3.64 | **2.91** |
+| corpus grounding | 93% | **99%** (real Khmer: 100%) |
+| lexicon coverage | 96% | **100%** (real Khmer: 94%) |
+
+v2 is *smaller* and substantially better. The gain came from four changes
+together: 12x more data exposure, weight tying, GPT-2 residual/embedding
+init scaling, and warmup + cosine decay. Perplexity 18.4 means the model
+narrows 4,000 possible next-tokens to roughly 18 on Khmer it has never
+seen. Validation loss was still falling when training stopped at 4,000
+steps, so this is not converged - it is where 13 hours on a Raspberry Pi
+happens to end.
+
+The output is Wikipedia-register Khmer with real structure - dates,
+units, titles, relative clauses - though not yet reliably meaningful
+sentences. That distinction matters and is not glossed over anywhere in
+this repo.
 
 `khmer_language/evaluation/` — the evaluation system (README §17–18):
 perplexity, Unicode validity rate, an error analyzer, and a benchmark
