@@ -1,0 +1,24 @@
+# Khmer instruction dataset (README section 15, Project 8).
+# One JSON object per line. Lines starting with # are ignored.
+#
+#   instruction - the question or task, in Khmer
+#   output      - the answer the model should learn to give
+#   input       - OPTIONAL extra context (e.g. text to translate/summarise)
+#
+# Train with:  python3 scripts/finetune_instruct.py
+#
+# IMPORTANT: the examples below were written by Claude, NOT by a Khmer
+# speaker, and are a FORMAT DEMONSTRATION only. Please correct or replace
+# them. Instruction tuning teaches the model to imitate these answers
+# exactly, so a wrong example teaches a wrong answer confidently.
+#
+# Rough guide to how many you need:
+#   ~10     the model memorises these exact pairs, nothing more
+#   ~1,000  it starts generalising the shape of answering
+#   ~10,000 usable general instruction-following
+{"instruction": "តើរាជធានីរបស់ប្រទេសកម្ពុជាគឺជាអ្វី?", "output": "រាជធានីរបស់ប្រទេសកម្ពុជាគឺទីក្រុងភ្នំពេញ។"}
+{"instruction": "តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?", "output": "ប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តសៀមរាប។"}
+{"instruction": "តើរូបិយប័ណ្ណរបស់កម្ពុជាមានឈ្មោះថាអ្វី?", "output": "រូបិយប័ណ្ណរបស់កម្ពុជាមានឈ្មោះថារៀល។"}
+{"instruction": "តើប្រទេសកម្ពុជាស្ថិតនៅតំបន់ណា?", "output": "ប្រទេសកម្ពុជាស្ថិតនៅតំបន់អាស៊ីអាគ្នេយ៍។"}
+{"instruction": "បកប្រែពាក្យនេះទៅជាភាសាអង់គ្លេស", "input": "សួស្តី", "output": "Hello"}
+{"instruction": "បកប្រែពាក្យនេះទៅជាភាសាខ្មែរ", "input": "thank you", "output": "អរគុណ"}
