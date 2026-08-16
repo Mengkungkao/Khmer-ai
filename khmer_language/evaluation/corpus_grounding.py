@@ -81,3 +81,23 @@ class CorpusGrounding:
     def summary(self, text: str) -> str:
         parts = [f"{n}-gram {s.ratio:.0%}" for n, s in sorted(self.score_all(text).items())]
         return "  ".join(parts)
+
+
+def distinct_n(text: str, n: int = 2) -> float:
+    """Fraction of the text's n-grams that are distinct (Li et al. 2016).
+
+    The necessary counterweight to grounding. Grounding rewards output
+    made of attested sequences, so on its own it is maximized by the most
+    conservative decoding possible - and greedy decoding on this model
+    scores near-perfectly while emitting one repeated zero-width space,
+    a distinct-token ratio of 10%.
+
+    Any decoding setting therefore has to be judged on both: grounded
+    enough to be real Khmer, diverse enough to be worth reading. Neither
+    number alone identifies a good sampler.
+    """
+    units = grapheme_strings(text)
+    if len(units) < n:
+        return 0.0
+    ngrams = [tuple(units[i : i + n]) for i in range(len(units) - n + 1)]
+    return len(set(ngrams)) / len(ngrams)

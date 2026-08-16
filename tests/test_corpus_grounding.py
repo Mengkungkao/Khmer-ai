@@ -1,6 +1,6 @@
 import pytest
 
-from khmer_language.evaluation.corpus_grounding import CorpusGrounding
+from khmer_language.evaluation.corpus_grounding import CorpusGrounding, distinct_n
 
 REFERENCE = [
     "ភ្នំពេញជារាជធានីនៃប្រទេសកម្ពុជា។",
@@ -80,3 +80,41 @@ def test_score_counts_are_consistent(grounding):
 def test_empty_reference_corpus_scores_everything_zero():
     grounding = CorpusGrounding([])
     assert grounding.score("កម្ពុជា", 2).ratio == 0.0
+
+
+# --------------------------------------------------------------------------
+# distinct-n (the counterweight to grounding)
+# --------------------------------------------------------------------------
+def test_fully_repetitive_text_scores_near_zero_diversity():
+    """Greedy decoding on the real model emitted one repeated character;
+    grounding rates that highly, so diversity must not."""
+    assert distinct_n("កកកកកកកកកក", 2) < 0.2
+
+
+def test_varied_text_scores_high_diversity():
+    assert distinct_n("ភ្នំពេញជារាជធានីនៃប្រទេសកម្ពុជា។", 2) > 0.8
+
+
+def test_diversity_and_grounding_disagree_on_repetition(grounding):
+    """The reason both metrics are needed: repeating a real Khmer phrase
+    stays largely grounded - its n-grams are genuinely attested - while
+    being worthless output. Only diversity catches that, which is why
+    optimizing grounding alone drives decoding toward degenerate greedy
+    sampling."""
+    repeated = "ភ្នំពេញ" * 6
+    grounded = grounding.score(repeated, 2).ratio
+    diverse = distinct_n(repeated, 2)
+
+    assert grounded > 0.6  # most bigrams are real Khmer
+    assert diverse < 0.4  # but the text says almost nothing
+    assert grounded > diverse + 0.25  # the metrics genuinely disagree
+
+
+def test_distinct_n_bounds():
+    assert distinct_n("", 2) == 0.0
+    assert distinct_n("ក", 2) == 0.0  # shorter than n
+    assert 0.0 <= distinct_n("កម្ពុជា", 2) <= 1.0
+
+
+def test_all_unique_ngrams_score_one():
+    assert distinct_n("កខគឃង", 1) == 1.0
