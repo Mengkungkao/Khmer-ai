@@ -13,12 +13,26 @@ trained language model, in [`khmer_language/`](khmer_language/):
 | 4 — Tokenizer lab | ✅ done |
 | 5 — Word2Vec | ✅ done |
 | 6 — Transformer from scratch | ✅ done |
-| 7 — KhmerGPT-0 | ✅ trains end to end |
+| 7 — KhmerGPT-0 | ✅ trains on real Khmer Wikipedia |
 | 8 — KhmerGPT-Instruct | ❌ needs a corpus |
 | 9–10 — Chatbot, voice | ❌ not started |
 
-Real Khmer text now flows through the whole stack. Build the corpus from a
-Wikipedia dump, then train on it:
+Real Khmer text now flows through the whole stack. The Khmer Wikipedia dump
+(16,775 articles) processes down to a clean corpus:
+
+```
+input:              16775
+  missing license:  0        <- Wikipedia is CC BY-SA 4.0 throughout
+  exact duplicates: 1297
+  near duplicates:  479
+  wrong language:   627
+  too short:        2839
+  low quality:      1
+output:             11532     39.4M characters, 309,449 sentences
+                              quality: min 0.601, mean 0.952
+```
+
+Build the corpus from a dump, then train on it:
 
 ```bash
 python3 scripts/train_khmergpt.py --corpus data/cleaned/kmwiki.jsonl
