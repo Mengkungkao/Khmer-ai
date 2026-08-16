@@ -8,13 +8,15 @@
 #   expected  - the correct answer, used for exact-match / CER / GER scoring
 #   note      - optional, for your own reference
 #
-# The cases below are EXAMPLES to show the format. Please verify, correct,
-# or replace them - they were not written by a Khmer speaker, and a
-# benchmark is only as trustworthy as the person who authored it.
+# The cases below were drafted by Claude and CONFIRMED CORRECT by the
+# project owner, a native Khmer speaker (2026-08-16), and independently
+# round-tripped through machine translation. Cases added later are
+# unverified until a Khmer speaker checks them - a benchmark is only as
+# trustworthy as whoever authored it.
 #
 # Load and run with:  python3 -m khmer_language --benchmark
-{"category": "knowledge", "input": "តើរាជធានីរបស់ប្រទេសកម្ពុជាគឺជាអ្វី?", "expected": "ភ្នំពេញ", "note": "EXAMPLE - please verify"}
-{"category": "knowledge", "input": "តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?", "expected": "សៀមរាប", "note": "EXAMPLE - please verify"}
-{"category": "knowledge", "input": "តើរូបិយប័ណ្ណរបស់កម្ពុជាមានឈ្មោះថាអ្វី?", "expected": "រៀល", "note": "EXAMPLE - please verify"}
-{"category": "translation", "input": "Cambodia", "expected": "កម្ពុជា", "note": "EXAMPLE - please verify"}
-{"category": "translation", "input": "thank you", "expected": "អរគុណ", "note": "EXAMPLE - please verify"}
+{"category": "knowledge", "input": "តើរាជធានីរបស់ប្រទេសកម្ពុជាគឺជាអ្វី?", "expected": "ភ្នំពេញ", "note": "verified by native speaker 2026-08-16"}
+{"category": "knowledge", "input": "តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?", "expected": "សៀមរាប", "note": "verified by native speaker 2026-08-16"}
+{"category": "knowledge", "input": "តើរូបិយប័ណ្ណរបស់កម្ពុជាមានឈ្មោះថាអ្វី?", "expected": "រៀល", "note": "verified by native speaker 2026-08-16"}
+{"category": "translation", "input": "Cambodia", "expected": "កម្ពុជា", "note": "verified by native speaker 2026-08-16"}
+{"category": "translation", "input": "thank you", "expected": "អរគុណ", "note": "verified by native speaker 2026-08-16"}

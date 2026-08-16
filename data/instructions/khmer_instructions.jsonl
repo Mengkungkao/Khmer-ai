@@ -7,10 +7,14 @@
 #
 # Train with:  python3 scripts/finetune_instruct.py
 #
-# IMPORTANT: the examples below were written by Claude, NOT by a Khmer
-# speaker, and are a FORMAT DEMONSTRATION only. Please correct or replace
-# them. Instruction tuning teaches the model to imitate these answers
-# exactly, so a wrong example teaches a wrong answer confidently.
+# The six examples below were drafted by Claude and then CONFIRMED CORRECT
+# by the project owner, a native Khmer speaker (2026-08-16). They are a
+# verified seed set, not a placeholder.
+#
+# Examples ADDED later carry no such guarantee. Instruction tuning teaches
+# the model to imitate answers exactly, so an unverified example teaches a
+# wrong answer confidently - have new entries checked by a Khmer speaker
+# before training on them.
 #
 # Rough guide to how many you need:
 #   ~10     the model memorises these exact pairs, nothing more

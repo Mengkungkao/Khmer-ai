@@ -48,6 +48,7 @@ class BPETokenizer(BaseTokenizer):
     def __init__(self) -> None:
         super().__init__()
         self.merges: list[tuple[str, str]] = []
+        self.alphabet_exceeds_vocab = False
 
     def train(self, corpus: list[str], vocab_size: int = 1000, min_frequency: int = 2) -> None:
         seq_freqs: Counter[Symbols] = Counter(
@@ -57,6 +58,26 @@ class BPETokenizer(BaseTokenizer):
         alphabet = sorted({symbol for seq in seq_freqs for symbol in seq})
         self.vocab = type(self.vocab)(alphabet)
         self.merges = []
+
+        # Khmer's grapheme inventory is enormous next to an alphabet:
+        # ~2,600 distinct clusters in real text, against roughly 100
+        # characters for English. If vocab_size does not exceed that
+        # inventory there is no room for a single merge, and BPE silently
+        # degrades into the grapheme tokenizer - identical output, with
+        # nothing to indicate the setting was meaningless.
+        if vocab_size <= len(self.vocab):
+            self.alphabet_exceeds_vocab = True
+            import warnings
+
+            warnings.warn(
+                f"vocab_size={vocab_size} is not larger than the {len(self.vocab)} base "
+                "grapheme clusters in this corpus, so no merges can be learned and this "
+                "behaves exactly like GraphemeTokenizer. Khmer needs a substantially "
+                "larger vocabulary than English for subword merging to begin.",
+                stacklevel=2,
+            )
+        else:
+            self.alphabet_exceeds_vocab = False
 
         while len(self.vocab) < vocab_size:
             pair_counts: Counter[tuple[str, str]] = Counter()
