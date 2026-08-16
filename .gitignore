@@ -12,6 +12,9 @@ venv/
 # cleaned output is derived from it. data/benchmark/ IS tracked - those cases
 # are hand-authored and are the valuable part.
 data/raw/
+# Derived lexicon: rebuildable from the Wiktionary export via
+# scripts/build_lexicon.py, so it is not tracked.
+data/lexicon/
 data/cleaned/
 data/train/
 data/validation/
