@@ -65,13 +65,19 @@ TRANSLATE_CAVEAT = """\
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", default="data/checkpoints/khmergpt0-kmwiki.npz")
-    parser.add_argument("--temperature", type=float, default=0.8)
+    # Defaults chosen by measurement, not taste - see scripts/tune_sampling.py.
+    # Across nine candidates, t=0.6/k=20 landed closest to real Khmer on
+    # grounding and diversity together (93.0%/79.8% against a real-corpus
+    # 99.8%/82.2%). A repetition penalty measurably HURT here, dropping
+    # grounding to 75.4%, so it defaults to off.
+    parser.add_argument("--temperature", type=float, default=0.6)
+    parser.add_argument("--top-k", type=int, default=20)
     parser.add_argument("--tokens", type=int, default=60)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--analyze", action="store_true", help="show the quality report each turn")
     parser.add_argument("--translate", action="store_true", help="show a rough English gloss")
-    parser.add_argument("--top-p", type=float, default=0.9)
-    parser.add_argument("--repetition-penalty", type=float, default=1.15)
+    parser.add_argument("--top-p", type=float, default=None)
+    parser.add_argument("--repetition-penalty", type=float, default=1.0)
     parser.add_argument("--prompt", default=None, help="run one prompt and exit (non-interactive)")
     args = parser.parse_args()
 
@@ -99,6 +105,7 @@ def main() -> int:
             ids,
             max_new_tokens=tokens,
             temperature=temperature,
+            top_k=args.top_k,
             top_p=args.top_p,
             repetition_penalty=args.repetition_penalty,
             rng=rng,
