@@ -80,8 +80,8 @@ def _run_train_demo(steps: int) -> int:
     return 0
 
 
-def _run_benchmark(cases_path: str | None) -> int:
-    """Score the repo's own components against the authored benchmark."""
+def _run_benchmark(cases_path: str | None, checkpoint: str | None = None) -> int:
+    """Score the repo's own components, and a model if one is supplied."""
     from .evaluation import (
         DEFAULT_CASES_PATH,
         STRUCTURAL_CASES,
@@ -115,10 +115,34 @@ def _run_benchmark(cases_path: str | None) -> int:
     print(format_benchmark(run_benchmark(list(STRUCTURAL_CASES), predict)))
 
     if authored:
-        print("\nAuthored cases (echo baseline - no trained model wired in yet):")
+        print("\nAuthored cases, echo baseline (what doing nothing scores):")
         print(format_benchmark(run_benchmark(authored, predict)))
-        print("\nThese scores are a floor, not a model evaluation: they show what")
-        print("a do-nothing baseline achieves, so a real model has something to beat.")
+
+        if checkpoint:
+            from .models.from_scratch.checkpoint import CheckpointError, load_checkpoint
+            from .training.instruction import answer
+
+            try:
+                model, tokenizer = load_checkpoint(checkpoint)
+            except CheckpointError as exc:
+                print(f"\nerror loading model: {exc}", file=sys.stderr)
+                return 1
+
+            def ask(text: str) -> str:
+                return answer(model, tokenizer, text, max_new_tokens=60, temperature=0.0)
+
+            print(f"\nAuthored cases, model ({checkpoint}):")
+            model_result = run_benchmark(authored, ask)
+            print(format_benchmark(model_result))
+
+            print("\nper-case detail:")
+            for row in model_result.results:
+                mark = {"exact": "EXACT   ", "contains": "CONTAINS", "wrong": "WRONG   "}[row.verdict]
+                print(f"  [{mark}] {row.case.input}")
+                print(f"         expected: {row.case.expected}")
+                print(f"         model   : {row.predicted}")
+        else:
+            print("\nPass --benchmark-model <checkpoint.npz> to score a trained model.")
     return 0
 
 
@@ -161,10 +185,19 @@ def main(argv: list[str] | None = None) -> int:
         metavar="CASES_PATH",
         help="run the KhmerAI benchmark (defaults to data/benchmark/cases.jsonl)",
     )
+    parser.add_argument(
+        "--benchmark-model",
+        default=None,
+        metavar="CHECKPOINT",
+        help="score this checkpoint against the authored benchmark cases",
+    )
     args = parser.parse_args(argv)
 
-    if args.benchmark is not None:
-        return _run_benchmark(args.benchmark or None)
+    if args.benchmark is not None or args.benchmark_model is not None:
+        return _run_benchmark(
+            (args.benchmark or None) if args.benchmark is not None else None,
+            args.benchmark_model,
+        )
 
     if args.train_demo is not None:
         return _run_train_demo(args.train_demo)

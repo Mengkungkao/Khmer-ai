@@ -37,6 +37,15 @@ class CaseResult:
     exact: bool
     cer: float
     ger: float
+    contains: bool = False
+
+    @property
+    def verdict(self) -> str:
+        if self.exact:
+            return "exact"
+        if self.contains:
+            return "contains"
+        return "wrong"
 
 
 @dataclass(frozen=True)
@@ -44,6 +53,7 @@ class CategoryScore:
     category: str
     num_cases: int
     exact_match_rate: float
+    contains_rate: float
     mean_cer: float
     mean_ger: float
 
@@ -66,6 +76,7 @@ class BenchmarkResult:
                     category=category,
                     num_cases=n,
                     exact_match_rate=sum(r.exact for r in rows) / n,
+                    contains_rate=sum(r.contains for r in rows) / n,
                     mean_cer=sum(r.cer for r in rows) / n,
                     mean_ger=sum(r.ger for r in rows) / n,
                 )
@@ -77,6 +88,24 @@ class BenchmarkResult:
         if not self.results:
             return 0.0
         return sum(r.exact for r in self.results) / len(self.results)
+
+    @property
+    def overall_contains(self) -> float:
+        """Share of answers containing the expected one.
+
+        Exact match alone is misleading for question answering. Asked for
+        Cambodia's capital, this project's model replied
+        "រាជធានីរបស់ប្រទេសកម្ពុជាគឺទីក្រុងភ្នំពេញ។" - a correct full
+        sentence - against an expected "ភ្នំពេញ", and scored zero. The
+        model was right and the metric was wrong.
+
+        Containment is looser and can reward a rambling answer that
+        happens to include the right words, so both numbers are reported
+        rather than one replacing the other.
+        """
+        if not self.results:
+            return 0.0
+        return sum(r.contains for r in self.results) / len(self.results)
 
 
 def run_benchmark(cases: list[BenchmarkCase], predict: Callable[[str], str]) -> BenchmarkResult:
@@ -91,21 +120,25 @@ def run_benchmark(cases: list[BenchmarkCase], predict: Callable[[str], str]) -> 
                 exact=exact_match(case.expected, predicted),
                 cer=character_error_rate(case.expected, predicted),
                 ger=grapheme_error_rate(case.expected, predicted),
+                contains=case.expected.strip() in predicted,
             )
         )
     return BenchmarkResult(results=tuple(results))
 
 
 def format_benchmark(result: BenchmarkResult) -> str:
-    header = f"{'category':<20} {'n':>4} {'exact':>8} {'CER':>8} {'GER':>8}"
+    header = f"{'category':<20} {'n':>4} {'exact':>8} {'contains':>9} {'CER':>8} {'GER':>8}"
     lines = [header, "-" * len(header)]
     for score in result.categories:
         lines.append(
             f"{score.category:<20} {score.num_cases:>4} {score.exact_match_rate:>7.0%} "
-            f"{score.mean_cer:>8.3f} {score.mean_ger:>8.3f}"
+            f"{score.contains_rate:>8.0%} {score.mean_cer:>9.3f} {score.mean_ger:>8.3f}"
         )
     lines.append("-" * len(header))
-    lines.append(f"{'OVERALL':<20} {len(result.results):>4} {result.overall_exact_match:>7.0%}")
+    lines.append(
+        f"{'OVERALL':<20} {len(result.results):>4} {result.overall_exact_match:>7.0%} "
+        f"{result.overall_contains:>8.0%}"
+    )
     return "\n".join(lines)
 
 
