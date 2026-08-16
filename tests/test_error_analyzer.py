@@ -66,6 +66,26 @@ def test_khmer_ratio_score_is_reported():
     assert _check(report, "Khmer script").score == 1.0
 
 
+def test_zero_width_word_separators_do_not_count_against_khmer_ratio():
+    """ZWSP is the conventional Khmer word boundary (Khmer has no spaces),
+    so it is everywhere in real Khmer text. Because "\\u200b".isspace() is
+    False, a naive whitespace filter let it through and scored genuine
+    Khmer as only 87% Khmer."""
+    zwsp = chr(0x200B)
+    text = f"ក្រុង{zwsp}ដូន{zwsp}ខ្មែរ"
+    assert _check(analyze_output(text), "Khmer script").score == 1.0
+
+
+def test_error_analyzer_and_language_id_agree_on_khmer_ratio():
+    """Two modules computing the same quantity must not disagree."""
+    from khmer_language.corpus.language_id import identify
+
+    zwsp = chr(0x200B)
+    for text in ("កម្ពុជា", f"ក្រុង{zwsp}ដូន", "កម្ពុជា Cambodia", "Hello"):
+        analyzer_score = _check(analyze_output(text), "Khmer script").score
+        assert analyzer_score == identify(text).khmer_ratio, f"disagreement on {text!r}"
+
+
 def test_empty_text_does_not_crash():
     report = analyze_output("")
     assert _check(report, "Khmer script").score == 0.0

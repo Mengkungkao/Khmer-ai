@@ -23,7 +23,10 @@ from dataclasses import dataclass
 
 from ..unicode.character_types import CharacterType, classify_codepoint
 
-_KHMER_TYPES = frozenset(
+# Every character the Khmer block assigns counts as Khmer script - including
+# combining marks (COENG, vowel signs, diacritics) and Khmer-specific
+# punctuation such as ។, which is itself strong evidence of Khmer.
+KHMER_SCRIPT_TYPES = frozenset(
     {
         CharacterType.CONSONANT,
         CharacterType.SUBSCRIPT_CONSONANT,
@@ -35,14 +38,16 @@ _KHMER_TYPES = frozenset(
         CharacterType.DIACRITIC,
         CharacterType.DIGIT,
         CharacterType.LEK_ATTAK,
+        CharacterType.PUNCTUATION,
         CharacterType.CURRENCY,
         CharacterType.OTHER_KHMER,
     }
 )
 
-# Punctuation and digits are script-neutral: ASCII digits and Latin
-# punctuation appear in perfectly good Khmer text, so counting them as
-# "not Khmer" would unfairly penalise it.
+# Skipped entirely rather than counted for either side. Whitespace and
+# zero-width characters carry no script (ZWSP is the standard Khmer word
+# boundary, so counting it against Khmer would be actively wrong), and
+# ASCII digits/punctuation appear in perfectly good Khmer text.
 _NEUTRAL_TYPES = frozenset({CharacterType.WHITESPACE, CharacterType.ZERO_WIDTH})
 
 
@@ -57,26 +62,42 @@ class LanguageScore:
         return self.khmer_ratio >= 0.5
 
 
-def _is_neutral(ch: str) -> bool:
-    if classify_codepoint(ord(ch)) in _NEUTRAL_TYPES:
-        return True
-    # Script-neutral characters: ASCII digits and common punctuation.
-    return ch.isdigit() or (not ch.isalpha() and not ch.isspace())
+def khmer_script_ratio(text: str) -> tuple[float, int, int]:
+    """Canonical Khmer-script measurement: (ratio, khmer_chars, other_chars).
+
+    This lives in one place because two modules previously computed it
+    separately and disagreed. Classification order matters and is the
+    subtlety worth stating: a character is checked against the Khmer
+    script FIRST, before any neutrality test.
+
+    Testing neutrality first is what caused the original bug. Khmer
+    combining marks (COENG, vowel signs) are Unicode categories Mn/Mc, so
+    `str.isalpha()` is False for them, and a `not ch.isalpha()` test meant
+    to skip ASCII punctuation silently skipped them too - undercounting
+    "កម្ពុជា" as 4 Khmer characters instead of 7, and under-rating
+    Khmer-heavy mixed-language documents in the corpus filter.
+    """
+    khmer = other = 0
+    for ch in text:
+        char_type = classify_codepoint(ord(ch))
+
+        if char_type in KHMER_SCRIPT_TYPES:
+            khmer += 1
+            continue
+        if char_type in _NEUTRAL_TYPES or ch.isspace():
+            continue
+        # Non-Khmer: script-bearing letters count against, while ASCII
+        # digits and punctuation are neutral.
+        if ch.isalpha():
+            other += 1
+
+    total = khmer + other
+    return (khmer / total if total else 0.0), khmer, other
 
 
 def identify(text: str) -> LanguageScore:
     """Measure how much of `text` is Khmer script."""
-    khmer = other = 0
-    for ch in text:
-        if _is_neutral(ch):
-            continue
-        if classify_codepoint(ord(ch)) in _KHMER_TYPES:
-            khmer += 1
-        else:
-            other += 1
-
-    total = khmer + other
-    ratio = khmer / total if total else 0.0
+    ratio, khmer, other = khmer_script_ratio(text)
     return LanguageScore(khmer_ratio=ratio, khmer_chars=khmer, other_chars=other)
 
 

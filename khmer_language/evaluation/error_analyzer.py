@@ -31,31 +31,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from ..unicode.character_types import CharacterType, classify_codepoint
+from ..corpus.language_id import khmer_script_ratio
 from ..unicode.grapheme import grapheme_strings
 from ..unicode.validator import ValidationIssue, validate
 
 PASS = "PASS"
 FAIL = "FAIL"
 UNAVAILABLE = "UNAVAILABLE"
-
-_KHMER_TYPES = frozenset(
-    {
-        CharacterType.CONSONANT,
-        CharacterType.SUBSCRIPT_CONSONANT,
-        CharacterType.INDEPENDENT_VOWEL,
-        CharacterType.DEPENDENT_VOWEL,
-        CharacterType.INHERENT_VOWEL,
-        CharacterType.REGISTER_SHIFTER,
-        CharacterType.COENG,
-        CharacterType.DIACRITIC,
-        CharacterType.DIGIT,
-        CharacterType.LEK_ATTAK,
-        CharacterType.PUNCTUATION,
-        CharacterType.CURRENCY,
-        CharacterType.OTHER_KHMER,
-    }
-)
 
 
 @dataclass(frozen=True)
@@ -85,11 +67,16 @@ class ErrorReport:
 
 
 def _khmer_ratio(text: str) -> float:
-    considered = [c for c in text if not c.isspace()]
-    if not considered:
-        return 0.0
-    khmer = sum(1 for c in considered if classify_codepoint(ord(c)) in _KHMER_TYPES)
-    return khmer / len(considered)
+    """Share of script-bearing characters that are Khmer.
+
+    Delegates to `corpus.language_id`, which owns the canonical
+    definition. This module previously had its own copy and the two
+    disagreed - notably on zero-width word separators and on Khmer
+    combining marks - so there is deliberately only one implementation
+    now, with a test asserting the two entry points agree.
+    """
+    ratio, _, _ = khmer_script_ratio(text)
+    return ratio
 
 
 def _max_repetition(text: str) -> int:

@@ -9,7 +9,7 @@ trained language model, in [`khmer_language/`](khmer_language/):
 |---|---|
 | 1 — Khmer Unicode & grapheme engine | ✅ done |
 | 2 — Grapheme & syllable parser | ✅ done |
-| 3 — Khmer corpus | ⚠️ pipeline done, **no data yet — the blocker** |
+| 3 — Khmer corpus | ✅ Khmer Wikipedia ingested (16,775 articles) |
 | 4 — Tokenizer lab | ✅ done |
 | 5 — Word2Vec | ✅ done |
 | 6 — Transformer from scratch | ✅ done |
@@ -17,9 +17,19 @@ trained language model, in [`khmer_language/`](khmer_language/):
 | 8 — KhmerGPT-Instruct | ❌ needs a corpus |
 | 9–10 — Chatbot, voice | ❌ not started |
 
-**The honest caveat:** everything above trains on `SAMPLE_CORPUS` — eight
-hand-written sentences. The machinery is real and tested; the *data* is a
-placeholder. Project 3 now gates every remaining milestone.
+Real Khmer text now flows through the whole stack. Build the corpus from a
+Wikipedia dump, then train on it:
+
+```bash
+python3 scripts/train_khmergpt.py --corpus data/cleaned/kmwiki.jsonl
+```
+
+The tokenizer is fitted on the **training split only** — fitting it on the
+whole corpus would let held-out text shape the vocabulary, quietly
+flattering validation numbers. Splits are made at the **document** level
+for the same reason: a Wikipedia article repeats names and phrases across
+its own sentences, so splitting mid-article leaks near-copies of
+validation text into training.
 
 Core Unicode/linguistics work has no third-party dependencies (stdlib
 only); the model stack uses NumPy and nothing else.
