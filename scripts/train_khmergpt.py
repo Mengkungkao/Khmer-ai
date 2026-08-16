@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from khmer_language.corpus import read_jsonl, split_documents  # noqa: E402
 from khmer_language.evaluation import analyze_output, format_report, perplexity  # noqa: E402
+from khmer_language.models.from_scratch.checkpoint import save_checkpoint  # noqa: E402
 from khmer_language.models.from_scratch.gpt import GPTConfig, KhmerGPT  # noqa: E402
 from khmer_language.tokenizer import BPETokenizer, GraphemeTokenizer  # noqa: E402
 from khmer_language.training import encode_corpus, train  # noqa: E402
@@ -131,10 +132,12 @@ def main() -> int:
         print("  " + format_report(analyze_output(text)).replace("\n", "\n  "))
 
     if args.save:
-        path = Path(args.save)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        np.savez(path, **{f"p{i}": p.value for i, p in enumerate(model.parameters())})
-        print(f"\nsaved weights to {path}")
+        # Saves the tokenizer alongside the weights - without it the token
+        # ids the model was trained on cannot be reproduced, so the
+        # checkpoint would load but be unusable.
+        saved = save_checkpoint(args.save, model, tokenizer)
+        print(f"\nsaved model + tokenizer to {saved}")
+        print(f"  chat with it:  python3 scripts/chat.py --checkpoint {saved}")
 
     return 0
 

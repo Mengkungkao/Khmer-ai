@@ -1,0 +1,139 @@
+import numpy as np
+import pytest
+
+from khmer_language.models.from_scratch.checkpoint import (
+    CheckpointError,
+    load_checkpoint,
+    save_checkpoint,
+)
+from khmer_language.models.from_scratch.gpt import GPTConfig, KhmerGPT
+from khmer_language.tokenizer import (
+    BPETokenizer,
+    CharacterTokenizer,
+    GraphemeTokenizer,
+    SAMPLE_CORPUS,
+    UnigramTokenizer,
+)
+
+CORPUS = list(SAMPLE_CORPUS)
+
+
+def _model(vocab_size):
+    return KhmerGPT(
+        GPTConfig(vocab_size=vocab_size, dim=16, num_layers=1, num_heads=2, max_seq_len=32), seed=0
+    )
+
+
+def _grapheme_setup():
+    tokenizer = GraphemeTokenizer()
+    tokenizer.train(CORPUS)
+    return _model(len(tokenizer.vocab)), tokenizer
+
+
+def test_round_trip_preserves_weights(tmp_path):
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+
+    loaded, _ = load_checkpoint(path)
+    for original, restored in zip(model.parameters(), loaded.parameters()):
+        assert np.array_equal(original.value, restored.value)
+
+
+def test_round_trip_preserves_architecture(tmp_path):
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+    loaded, _ = load_checkpoint(path)
+    assert loaded.config == model.config
+    assert loaded.num_parameters() == model.num_parameters()
+
+
+def test_round_trip_preserves_the_tokenizer(tmp_path):
+    """Without the tokenizer a checkpoint loads but cannot be used: token
+    ids have no meaning without the vocabulary that produced them."""
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+    _, restored = load_checkpoint(path)
+
+    text = CORPUS[0]
+    assert restored.encode(text) == tokenizer.encode(text)
+    assert restored.decode(restored.encode(text)) == text
+
+
+def test_loaded_model_produces_identical_output(tmp_path):
+    """The real test of a checkpoint: same input, same logits."""
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+    loaded, _ = load_checkpoint(path)
+
+    ids = np.array([tokenizer.encode(CORPUS[0])[:8]])
+    assert np.allclose(model.forward(ids), loaded.forward(ids))
+
+
+def test_loaded_model_generates_identically_for_a_fixed_seed(tmp_path):
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+    loaded, restored = load_checkpoint(path)
+
+    prompt = tokenizer.encode(CORPUS[0])[:4]
+    a = model.generate(prompt, max_new_tokens=10, rng=np.random.default_rng(3))
+    b = loaded.generate(prompt, max_new_tokens=10, rng=np.random.default_rng(3))
+    assert a == b
+
+
+def test_bpe_merges_survive_the_round_trip(tmp_path):
+    tokenizer = BPETokenizer()
+    tokenizer.train(CORPUS, vocab_size=120)
+    model = _model(len(tokenizer.vocab))
+
+    path = save_checkpoint(tmp_path / "bpe.npz", model, tokenizer)
+    _, restored = load_checkpoint(path)
+
+    assert restored.merges == tokenizer.merges
+    assert restored.tokenize(CORPUS[0]) == tokenizer.tokenize(CORPUS[0])
+
+
+def test_unigram_probabilities_survive_the_round_trip(tmp_path):
+    tokenizer = UnigramTokenizer()
+    tokenizer.train(CORPUS, vocab_size=90)
+    model = _model(len(tokenizer.vocab))
+
+    path = save_checkpoint(tmp_path / "uni.npz", model, tokenizer)
+    _, restored = load_checkpoint(path)
+
+    assert restored.tokenize(CORPUS[0]) == tokenizer.tokenize(CORPUS[0])
+
+
+def test_character_tokenizer_round_trips(tmp_path):
+    tokenizer = CharacterTokenizer()
+    tokenizer.train(CORPUS)
+    model = _model(len(tokenizer.vocab))
+    path = save_checkpoint(tmp_path / "char.npz", model, tokenizer)
+    _, restored = load_checkpoint(path)
+    assert restored.encode(CORPUS[0]) == tokenizer.encode(CORPUS[0])
+
+
+def test_missing_file_raises_a_clear_error(tmp_path):
+    with pytest.raises(CheckpointError, match="no checkpoint"):
+        load_checkpoint(tmp_path / "absent.npz")
+
+
+def test_weights_only_file_is_rejected_with_an_explanation(tmp_path):
+    """A file with no metadata cannot be used, and must say why rather
+    than failing obscurely later."""
+    path = tmp_path / "weights_only.npz"
+    np.savez(path, p0=np.zeros((2, 2)))
+    with pytest.raises(CheckpointError, match="no metadata"):
+        load_checkpoint(path)
+
+
+def test_shape_mismatch_is_detected(tmp_path):
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+
+    with np.load(path, allow_pickle=True) as data:
+        contents = {k: data[k] for k in data.files}
+    contents["p0"] = np.zeros((3, 3))
+    np.savez(path, **contents)
+
+    with pytest.raises(CheckpointError, match="shape"):
+        load_checkpoint(path)
