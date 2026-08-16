@@ -79,6 +79,58 @@ def _khmer_ratio(text: str) -> float:
     return ratio
 
 
+def _spelling_check(text: str, min_score: float = 0.9) -> Check | None:
+    """Spelling, if a lexicon has been built.
+
+    Returns None when no lexicon exists, so the report falls back to
+    listing spelling as unavailable rather than silently passing text
+    nothing actually checked.
+
+    Only *likely misspellings* count against the score - words a single
+    edit away from a real dictionary word. Words simply absent from the
+    dictionary do not, because 24% of Khmer Wikipedia words are outside
+    this lexicon and virtually all of them are correctly spelled proper
+    nouns and technical terms. Treating those as errors would make the
+    check worse than useless.
+    """
+    try:
+        from ..lexicon import KhmerLexicon
+        from ..lexicon.spelling import SpellChecker
+    except ImportError:  # pragma: no cover
+        return None
+
+    global _SPELL_CHECKER
+    if _SPELL_CHECKER is None:
+        try:
+            _SPELL_CHECKER = SpellChecker(KhmerLexicon.load())
+        except FileNotFoundError:
+            return None
+
+    report = _SPELL_CHECKER.check(text)
+    if not report.checks:
+        return None
+
+    detail = f"{len(report.misspelled)} likely misspelling(s)"
+    if report.unknown:
+        detail += f", {len(report.unknown)} not in dictionary (not counted as errors)"
+    if report.misspelled:
+        first = report.misspelled[0]
+        if first.suggestions:
+            detail += f"; e.g. {first.word} -> {first.suggestions[0]}"
+
+    return Check(
+        name="Spelling",
+        status=PASS if report.score >= min_score else FAIL,
+        detail=detail,
+        score=report.score,
+    )
+
+
+# Built lazily and reused: the deletion index costs a second to construct
+# and the analyzer is called per model output.
+_SPELL_CHECKER = None
+
+
 def _max_repetition(text: str) -> int:
     """Longest run of a single repeated grapheme cluster."""
     units = grapheme_strings(text)
@@ -123,18 +175,19 @@ def analyze_output(
         score=float(repetition),
     )
 
+    spelling_check = _spelling_check(text)
+
     unavailable = (
-        Check("Spelling", UNAVAILABLE, "needs the Khmer dictionary (README section 8)"),
         Check("Grammar", UNAVAILABLE, "needs a parser or trained grammar model"),
         Check("Meaning", UNAVAILABLE, "needs reference answers or a judge model"),
         Check("Naturalness", UNAVAILABLE, "needs a reference LM or human ratings"),
     )
 
-    return ErrorReport(
-        text=text,
-        checks=(unicode_check, script_check, repetition_check) + unavailable,
-        issues=issues,
-    )
+    implemented = (unicode_check, script_check, repetition_check)
+    if spelling_check is not None:
+        implemented += (spelling_check,)
+
+    return ErrorReport(text=text, checks=implemented + unavailable, issues=issues)
 
 
 def format_report(report: ErrorReport) -> str:

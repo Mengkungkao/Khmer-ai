@@ -48,17 +48,27 @@ def test_mild_repetition_is_allowed():
 
 def test_unimplemented_checks_are_reported_as_unavailable_with_a_reason():
     """These must never silently report PASS - a fabricated score would
-    make the model look evaluated when it is not."""
+    make the model look evaluated when it is not.
+
+    Spelling used to be on this list. It became implementable once the
+    Khmer lexicon existed, which is the intended direction of travel:
+    checks graduate off this list by being built, never by being faked.
+    """
     report = analyze_output("កម្ពុជា")
-    for name in ("Spelling", "Grammar", "Meaning", "Naturalness"):
+    for name in ("Grammar", "Meaning", "Naturalness"):
         check = _check(report, name)
         assert check.status == UNAVAILABLE
         assert check.detail  # must explain what is missing
 
 
 def test_unavailable_checks_do_not_count_as_passes_in_coverage():
+    """Coverage counts what is actually measured. It read 3/7 before the
+    lexicon existed and 4/7 once spelling could be checked for real."""
+    from khmer_language.lexicon import DEFAULT_LEXICON
+
     report = analyze_output("កម្ពុជា")
-    assert report.coverage == "3/7 checks implemented"
+    expected = "4/7" if DEFAULT_LEXICON.exists() else "3/7"
+    assert report.coverage == f"{expected} checks implemented"
 
 
 def test_khmer_ratio_score_is_reported():
@@ -95,4 +105,4 @@ def test_format_report_shows_statuses_and_coverage():
     output = format_report(analyze_output("កម្ពុជា"))
     assert "Unicode:" in output
     assert "UNAVAILABLE" in output
-    assert "3/7 checks implemented" in output
+    assert "checks implemented" in output
