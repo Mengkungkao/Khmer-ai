@@ -219,13 +219,23 @@ def answer(
     model: KhmerGPT,
     tokenizer: BaseTokenizer,
     question: str,
+    input: str = "",
     max_new_tokens: int = 40,
     temperature: float = 0.6,
     top_k: int = 20,
     rng: np.random.Generator | None = None,
 ) -> str:
-    """Ask an instruction-tuned model a question and return its answer."""
-    example = InstructionExample(instruction=question, output="")
+    """Ask an instruction-tuned model a question and return its answer.
+
+    `input` supplies the extra context some tasks need - the text to
+    translate or summarize. It must be passed whenever the training
+    example had one, because the prompt is reconstructed here and has to
+    match the training format exactly. Omitting it asks the model to
+    translate without showing it what to translate, and the model does
+    not fail cleanly: it produces a fluent answer to the question it
+    imagines was asked.
+    """
+    example = InstructionExample(instruction=question, output="", input=input)
     prompt_ids = tokenizer.encode(example.format_prompt())[-model.config.max_seq_len :]
     generated = model.generate(
         prompt_ids,

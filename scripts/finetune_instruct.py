@@ -79,7 +79,8 @@ def main() -> int:
 
     print("BEFORE fine-tuning:")
     for example in examples[:2]:
-        before = answer(model, tokenizer, example.instruction, 20, rng=np.random.default_rng(0))
+        before = answer(model, tokenizer, example.instruction, example.input, 20,
+                        rng=np.random.default_rng(0))
         print(f"  Q {example.instruction}")
         print(f"  A {before!r}")
 
@@ -93,7 +94,7 @@ def main() -> int:
     print("AFTER fine-tuning:")
     correct = 0
     for example in examples:
-        got = answer(model, tokenizer, example.instruction, 60, temperature=0.0)
+        got = answer(model, tokenizer, example.instruction, example.input, 60, temperature=0.0)
         exact = got == example.output
         correct += exact
         print(f"  Q {example.instruction}")

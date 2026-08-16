@@ -169,6 +169,33 @@ def test_answers_terminate_instead_of_rambling():
     assert len(got) <= len(EXAMPLES[0].output) + 2
 
 
+def test_answer_passes_the_input_field_through():
+    """Regression: `answer()` dropped `input`, so a translation task was
+    asked without showing the model WHAT to translate. It did not fail
+    cleanly - it fluently answered a different question."""
+    examples = [
+        InstructionExample("បកប្រែទៅជាភាសាអង់គ្លេស", "Hello", input="សួស្តី"),
+        InstructionExample("បកប្រែទៅជាភាសាអង់គ្លេស", "Thank you", input="អរគុណ"),
+    ]
+    tokenizer = GraphemeTokenizer()
+    tokenizer.train([e.format_full() for e in examples])
+    model = KhmerGPT(
+        GPTConfig(vocab_size=len(tokenizer.vocab), dim=64, num_layers=2, num_heads=2,
+                  max_seq_len=96),
+        seed=0,
+    )
+    finetune(model, examples, tokenizer, steps=250, batch_size=2, lr=3e-3, seed=0)
+
+    # Same instruction, different input -> must give different answers.
+    first = answer(model, tokenizer, examples[0].instruction, examples[0].input,
+                   max_new_tokens=20, temperature=0.0)
+    second = answer(model, tokenizer, examples[1].instruction, examples[1].input,
+                    max_new_tokens=20, temperature=0.0)
+    assert first != second
+    assert first == examples[0].output
+    assert second == examples[1].output
+
+
 def test_generation_stops_at_eos():
     model, tokenizer = _setup()
     eos = tokenizer.vocab.encode_token(EOS)
