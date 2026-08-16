@@ -116,8 +116,36 @@ def load_checkpoint(path: str | Path) -> tuple[KhmerGPT, BaseTokenizer]:
                 f"!= supported {CHECKPOINT_VERSION}"
             )
 
-        model = KhmerGPT(GPTConfig(**metadata["config"]))
+        config_fields = dict(metadata["config"])
+        saved_arrays = sum(1 for name in data.files if name.startswith("p"))
+
+        # Backward compatibility. `tie_embeddings` was added after some
+        # checkpoints were written, and it changes the parameter LIST -
+        # a tied model has no separate head matrix. Defaulting it for an
+        # older file silently builds the wrong architecture and loads
+        # weights into mismatched slots, which does not crash: it just
+        # produces a model that generates garbage. Infer it from the
+        # array count instead of assuming.
+        if "tie_embeddings" not in config_fields:
+            for tie in (False, True):
+                candidate = GPTConfig(**config_fields, tie_embeddings=tie)
+                if len(KhmerGPT(candidate).parameters()) == saved_arrays:
+                    config_fields["tie_embeddings"] = tie
+                    break
+
+        model = KhmerGPT(GPTConfig(**config_fields))
         parameters = model.parameters()
+
+        # Guard the general case: any mismatch between what the file holds
+        # and what the architecture expects means the weights cannot be
+        # placed correctly, so fail loudly rather than load them wrongly.
+        if saved_arrays != len(parameters):
+            raise CheckpointError(
+                f"{path} holds {saved_arrays} weight arrays but this architecture "
+                f"expects {len(parameters)}; the saved config does not describe these "
+                "weights, so loading them would silently produce a broken model"
+            )
+
         for i, parameter in enumerate(parameters):
             key = f"p{i}"
             if key not in data:

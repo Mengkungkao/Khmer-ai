@@ -126,6 +126,71 @@ def test_weights_only_file_is_rejected_with_an_explanation(tmp_path):
         load_checkpoint(path)
 
 
+def test_legacy_checkpoint_without_tie_flag_infers_the_architecture(tmp_path):
+    """Regression: `tie_embeddings` was added later with a default of
+    True, which changes the PARAMETER LIST (a tied model has no separate
+    head matrix). Older files then built the wrong architecture, loaded
+    weights into mismatched slots, raised nothing, and generated garbage.
+    """
+    import json
+
+    tokenizer = GraphemeTokenizer()
+    tokenizer.train(CORPUS)
+    untied = KhmerGPT(
+        GPTConfig(
+            vocab_size=len(tokenizer.vocab), dim=16, num_layers=1, num_heads=2,
+            max_seq_len=32, tie_embeddings=False,
+        ),
+        seed=0,
+    )
+    path = save_checkpoint(tmp_path / "legacy.npz", untied, tokenizer)
+
+    # Strip the flag, as a checkpoint written before it existed would be.
+    with np.load(path, allow_pickle=True) as data:
+        contents = {k: data[k] for k in data.files}
+    metadata = json.loads(str(contents["metadata"]))
+    del metadata["config"]["tie_embeddings"]
+    contents["metadata"] = np.array(json.dumps(metadata), dtype=object)
+    np.savez(path, **contents)
+
+    loaded, _ = load_checkpoint(path)
+    assert loaded.config.tie_embeddings is False
+    ids = np.array([[1, 2, 3]])
+    assert np.allclose(untied.forward(ids), loaded.forward(ids))
+
+
+def test_array_count_mismatch_is_rejected(tmp_path):
+    """A file whose weight count disagrees with the architecture cannot be
+    loaded correctly, so it must fail loudly rather than partially."""
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+
+    with np.load(path, allow_pickle=True) as data:
+        contents = {k: data[k] for k in data.files}
+    contents["p999"] = np.zeros(3)  # an extra array the model does not expect
+    np.savez(path, **contents)
+
+    with pytest.raises(CheckpointError, match="weight arrays"):
+        load_checkpoint(path)
+
+
+def test_tied_and_untied_checkpoints_do_not_cross_load(tmp_path):
+    tokenizer = GraphemeTokenizer()
+    tokenizer.train(CORPUS)
+    base = dict(vocab_size=len(tokenizer.vocab), dim=16, num_layers=1, num_heads=2, max_seq_len=32)
+
+    tied = KhmerGPT(GPTConfig(**base, tie_embeddings=True), seed=0)
+    untied = KhmerGPT(GPTConfig(**base, tie_embeddings=False), seed=0)
+    assert len(tied.parameters()) != len(untied.parameters())
+
+    for model, name in ((tied, "tied.npz"), (untied, "untied.npz")):
+        path = save_checkpoint(tmp_path / name, model, tokenizer)
+        loaded, _ = load_checkpoint(path)
+        assert loaded.config.tie_embeddings == model.config.tie_embeddings
+        ids = np.array([[1, 2, 3]])
+        assert np.allclose(model.forward(ids), loaded.forward(ids))
+
+
 def test_shape_mismatch_is_detected(tmp_path):
     model, tokenizer = _grapheme_setup()
     path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
