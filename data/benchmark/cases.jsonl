@@ -1,0 +1,20 @@
+# KhmerAI Benchmark cases (README section 17).
+# One JSON object per line. Lines starting with # and blank lines are ignored.
+#
+# Fields:
+#   category  - groups scores in the report (knowledge, comprehension,
+#               translation, reasoning, grammar, ...)
+#   input     - what the model is given
+#   expected  - the correct answer, used for exact-match / CER / GER scoring
+#   note      - optional, for your own reference
+#
+# The cases below are EXAMPLES to show the format. Please verify, correct,
+# or replace them - they were not written by a Khmer speaker, and a
+# benchmark is only as trustworthy as the person who authored it.
+#
+# Load and run with:  python3 -m khmer_language --benchmark
+{"category": "knowledge", "input": "តើរាជធានីរបស់ប្រទេសកម្ពុជាគឺជាអ្វី?", "expected": "ភ្នំពេញ", "note": "EXAMPLE - please verify"}
+{"category": "knowledge", "input": "តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?", "expected": "សៀមរាប", "note": "EXAMPLE - please verify"}
+{"category": "knowledge", "input": "តើរូបិយប័ណ្ណរបស់កម្ពុជាមានឈ្មោះថាអ្វី?", "expected": "រៀល", "note": "EXAMPLE - please verify"}
+{"category": "translation", "input": "Cambodia", "expected": "កម្ពុជា", "note": "EXAMPLE - please verify"}
+{"category": "translation", "input": "thank you", "expected": "អរគុណ", "note": "EXAMPLE - please verify"}

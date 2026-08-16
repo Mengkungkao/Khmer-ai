@@ -9,6 +9,12 @@ from .benchmark import (
     format_benchmark,
     run_benchmark,
 )
+from .cases import (
+    DEFAULT_CASES_PATH,
+    BenchmarkCaseError,
+    case_counts,
+    load_cases,
+)
 from .error_analyzer import (
     FAIL,
     PASS,
@@ -30,6 +36,10 @@ from .metrics import (
 )
 
 __all__ = [
+    "DEFAULT_CASES_PATH",
+    "BenchmarkCaseError",
+    "case_counts",
+    "load_cases",
     "STRUCTURAL_CASES",
     "BenchmarkCase",
     "BenchmarkResult",

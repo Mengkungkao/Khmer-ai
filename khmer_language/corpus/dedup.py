@@ -90,6 +90,20 @@ class MinHasher:
     def similarity(self, sig_a: np.ndarray, sig_b: np.ndarray) -> float:
         return float(np.mean(sig_a == sig_b))
 
+    def bands(self, signature: np.ndarray, num_bands: int) -> list[bytes]:
+        """Split a signature into `num_bands` band keys for LSH bucketing.
+
+        Two documents are treated as *candidates* if any band matches
+        exactly. Probability of at least one band colliding is
+        1 - (1 - s^r)^b for similarity s with b bands of r rows, an
+        S-curve that rises sharply near s = (1/b)^(1/r). Choosing bands so
+        that knee sits just below the similarity threshold means genuine
+        near-duplicates almost always become candidates, while unrelated
+        pairs almost never do.
+        """
+        rows = len(signature) // num_bands
+        return [signature[i * rows : (i + 1) * rows].tobytes() for i in range(num_bands)]
+
 
 @dataclass(frozen=True)
 class DedupResult:
@@ -107,12 +121,21 @@ def deduplicate(
     near_duplicate_threshold: float = 0.8,
     num_hashes: int = 64,
     shingle_size: int = 5,
+    num_bands: int = 8,
     seed: int = 0,
 ) -> DedupResult:
     """Remove exact and near-duplicate documents, keeping the first seen.
 
+    Near-duplicate search uses LSH banding rather than comparing every
+    document against every other. The naive all-pairs version is O(n^2)
+    and becomes unusable on a real corpus - at 10k documents it is 50M
+    signature comparisons. Banding buckets documents by band key and only
+    compares within a bucket, which is effectively linear while still
+    confirming every candidate with the real similarity, so results stay
+    exact rather than approximate for the pairs it does examine.
+
     Set `near_duplicate_threshold` to 1.0 to skip near-duplicate detection
-    (exact only), which is much faster on large corpora.
+    entirely (exact hashing only), which is faster still.
     """
     kept: list[Document] = []
     seen_hashes: set[str] = set()
@@ -120,7 +143,7 @@ def deduplicate(
 
     do_near = near_duplicate_threshold < 1.0
     hasher = MinHasher(num_hashes=num_hashes, seed=seed) if do_near else None
-    signatures: list[np.ndarray] = []
+    buckets: dict[tuple[int, bytes], list[np.ndarray]] = {}
 
     for doc in documents:
         digest = content_hash(doc.text)
@@ -131,10 +154,22 @@ def deduplicate(
         if do_near:
             assert hasher is not None
             signature = hasher.signature(doc.text, n=shingle_size)
-            if any(hasher.similarity(signature, s) >= near_duplicate_threshold for s in signatures):
+            band_keys = [(i, b) for i, b in enumerate(hasher.bands(signature, num_bands))]
+
+            candidates: list[np.ndarray] = []
+            seen_ids: set[int] = set()
+            for key in band_keys:
+                for other in buckets.get(key, ()):
+                    if id(other) not in seen_ids:
+                        seen_ids.add(id(other))
+                        candidates.append(other)
+
+            if any(hasher.similarity(signature, c) >= near_duplicate_threshold for c in candidates):
                 near += 1
                 continue
-            signatures.append(signature)
+
+            for key in band_keys:
+                buckets.setdefault(key, []).append(signature)
 
         seen_hashes.add(digest)
         kept.append(doc)

@@ -7,3 +7,12 @@ dist/
 .venv/
 venv/
 .DS_Store
+
+# Corpus artifacts: the Wikipedia dump is 32MB and re-downloadable, and the
+# cleaned output is derived from it. data/benchmark/ IS tracked - those cases
+# are hand-authored and are the valuable part.
+data/raw/
+data/cleaned/
+data/train/
+data/validation/
+data/test/
