@@ -30,6 +30,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from khmer_language.evaluation import analyze_output, format_report  # noqa: E402
+from khmer_language.evaluation.reference_translation import ReferenceTranslator  # noqa: E402
 from khmer_language.models.from_scratch.checkpoint import (  # noqa: E402
     CheckpointError,
     load_checkpoint,
@@ -50,8 +51,15 @@ Try giving it the beginning of a sentence, for example:
 Commands:  /temp <n>   sampling temperature (lower = safer, higher = wilder)
            /tokens <n> how many tokens to generate
            /analyze    toggle the structural quality report
+           /translate  toggle a rough English gloss (see caveat below)
            /quit       exit
 ────────────────────────────────────────────────────────────────────"""
+
+TRANSLATE_CAVEAT = """\
+  note: machine translation always returns something plausible, so a
+  readable gloss does NOT mean the Khmer was correct. Measured on this
+  project, real Khmer, model output and pure nonsense all came back with
+  the same 0.85 confidence score. Use it to get the gist, not as a grader."""
 
 
 def main() -> int:
@@ -61,6 +69,9 @@ def main() -> int:
     parser.add_argument("--tokens", type=int, default=60)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--analyze", action="store_true", help="show the quality report each turn")
+    parser.add_argument("--translate", action="store_true", help="show a rough English gloss")
+    parser.add_argument("--top-p", type=float, default=0.9)
+    parser.add_argument("--repetition-penalty", type=float, default=1.15)
     parser.add_argument("--prompt", default=None, help="run one prompt and exit (non-interactive)")
     args = parser.parse_args()
 
@@ -77,22 +88,39 @@ def main() -> int:
     temperature = args.temperature
     tokens = args.tokens
     show_analysis = args.analyze
+    show_translation = args.translate
+    translator = ReferenceTranslator()
 
     def respond(prompt: str) -> str:
         ids = tokenizer.encode(prompt)
         if not ids:
             return ""
         generated = model.generate(
-            ids, max_new_tokens=tokens, temperature=temperature, top_k=40, rng=rng
+            ids,
+            max_new_tokens=tokens,
+            temperature=temperature,
+            top_p=args.top_p,
+            repetition_penalty=args.repetition_penalty,
+            rng=rng,
         )
         # Return only the continuation, so it is obvious what the model added.
         return tokenizer.decode(generated[len(ids):])
+
+    def gloss(text: str) -> None:
+        result = translator.translate(text)
+        if result is None:
+            print("  [gloss unavailable - translation service unreachable]")
+        else:
+            print(f"  [gloss] {result.translated}")
+        print(TRANSLATE_CAVEAT)
 
     if args.prompt is not None:
         continuation = respond(args.prompt)
         print(f"{args.prompt}{continuation}")
         if show_analysis:
             print(format_report(analyze_output(continuation)))
+        if show_translation:
+            gloss(args.prompt + continuation)
         return 0
 
     print(BANNER)
@@ -114,6 +142,10 @@ def main() -> int:
             show_analysis = not show_analysis
             print(f"      analysis {'on' if show_analysis else 'off'}\n")
             continue
+        if line == "/translate":
+            show_translation = not show_translation
+            print(f"      gloss {'on' if show_translation else 'off'}\n")
+            continue
         if line.startswith("/temp"):
             try:
                 temperature = float(line.split()[1])
@@ -133,6 +165,9 @@ def main() -> int:
         print(f"gpt ▸ {line}\033[1m{continuation}\033[0m\n")
         if show_analysis:
             print(format_report(analyze_output(continuation)))
+            print()
+        if show_translation:
+            gloss(line + continuation)
             print()
 
     return 0
