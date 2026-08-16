@@ -173,6 +173,7 @@ class KhmerGPT(Layer):
         top_k: int | None = None,
         top_p: float | None = None,
         repetition_penalty: float = 1.0,
+        eos_id: int | None = None,
         rng: np.random.Generator | None = None,
     ) -> list[int]:
         """Autoregressively sample continuation ids.
@@ -190,6 +191,11 @@ class KhmerGPT(Layer):
         `repetition_penalty` > 1 divides the logits of tokens already
         generated, discouraging the loops that undertrained models fall
         into.
+
+        `eos_id` stops generation as soon as that token is produced. A
+        model with no end-of-sequence token has no way to signal that it
+        has finished, so it keeps going and pads a correct answer with
+        repeated fragments - "ភ្នំពេញពេញពេញ" instead of "ភ្នំពេញ".
         """
         rng = rng or np.random.default_rng()
         ids = list(prompt_ids)
@@ -210,7 +216,10 @@ class KhmerGPT(Layer):
                 )
 
             if temperature <= 0:
-                ids.append(int(np.argmax(logits)))
+                chosen = int(np.argmax(logits))
+                ids.append(chosen)
+                if eos_id is not None and chosen == eos_id:
+                    break
                 continue
 
             logits = logits / temperature
@@ -231,6 +240,9 @@ class KhmerGPT(Layer):
                 logits = mask
 
             probs = softmax(logits)
-            ids.append(int(rng.choice(len(probs), p=probs)))
+            chosen = int(rng.choice(len(probs), p=probs))
+            ids.append(chosen)
+            if eos_id is not None and chosen == eos_id:
+                break
 
         return ids

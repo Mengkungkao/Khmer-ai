@@ -195,7 +195,9 @@ def softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
     return exp / exp.sum(axis=axis, keepdims=True)
 
 
-def cross_entropy_loss(logits: np.ndarray, targets: np.ndarray) -> tuple[float, np.ndarray]:
+def cross_entropy_loss(
+    logits: np.ndarray, targets: np.ndarray, mask: np.ndarray | None = None
+) -> tuple[float, np.ndarray]:
     """Mean cross-entropy over a batch, plus the gradient w.r.t. `logits`.
 
     `logits` is (..., vocab), `targets` holds the correct id per position.
@@ -203,16 +205,39 @@ def cross_entropy_loss(logits: np.ndarray, targets: np.ndarray) -> tuple[float, 
     because their composed gradient simplifies exactly to (probs - onehot),
     which is both faster and more numerically stable than backpropagating
     through a separate softmax layer.
+
+    `mask` (same shape as `targets`, non-zero where a position counts)
+    restricts the loss to selected positions. This is what makes
+    instruction tuning work: the model is shown prompt and response
+    together, but should only be taught to produce the response. Without
+    masking it would be trained to generate the questions too, and would
+    happily continue a prompt with another prompt.
+
+    Masked-out positions receive exactly zero gradient, and the mean is
+    taken over counted positions only - so the loss does not shrink just
+    because a batch happens to contain long prompts.
     """
     flat_logits = logits.reshape(-1, logits.shape[-1])
     flat_targets = targets.reshape(-1)
     n = flat_logits.shape[0]
 
     probs = softmax(flat_logits, axis=-1)
-    correct = probs[np.arange(n), flat_targets]
-    loss = float(-np.log(np.clip(correct, 1e-12, None)).mean())
+    correct = np.clip(probs[np.arange(n), flat_targets], 1e-12, None)
 
     dlogits = probs.copy()
     dlogits[np.arange(n), flat_targets] -= 1.0
-    dlogits /= n
+
+    if mask is None:
+        loss = float(-np.log(correct).mean())
+        dlogits /= n
+    else:
+        flat_mask = mask.reshape(-1).astype(np.float64)
+        counted = flat_mask.sum()
+        if counted == 0:
+            # Nothing to learn from; return zero rather than dividing by zero.
+            return 0.0, np.zeros_like(logits)
+        loss = float(-(np.log(correct) * flat_mask).sum() / counted)
+        dlogits *= flat_mask[:, None]
+        dlogits /= counted
+
     return loss, dlogits.reshape(logits.shape)
