@@ -85,6 +85,28 @@ class Adam(Optimizer):
             p.value -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
 
 
+def cosine_lr(step: int, total_steps: int, base_lr: float, warmup: int = 0, min_ratio: float = 0.1) -> float:
+    """Learning rate with linear warmup then cosine decay.
+
+    Two problems, one schedule. Early on, Adam's running averages are
+    still poor estimates and a full-size step can push the model somewhere
+    it takes a long time to recover from - so the rate is ramped in
+    linearly over `warmup` steps. Late on, a rate large enough to make
+    early progress is too large to settle into a minimum, so it decays
+    along a cosine to `min_ratio * base_lr`.
+
+    A constant learning rate has to compromise between those, and is a
+    common reason a small model plateaus above the loss it could reach.
+    """
+    if warmup > 0 and step < warmup:
+        return base_lr * (step + 1) / warmup
+
+    progress = (step - warmup) / max(1, total_steps - warmup)
+    progress = min(max(progress, 0.0), 1.0)
+    cosine = 0.5 * (1.0 + np.cos(np.pi * progress))
+    return base_lr * (min_ratio + (1.0 - min_ratio) * cosine)
+
+
 def clip_grad_norm(parameters: list[Parameter], max_norm: float) -> float:
     """Rescale all gradients so their combined L2 norm is <= `max_norm`.
 

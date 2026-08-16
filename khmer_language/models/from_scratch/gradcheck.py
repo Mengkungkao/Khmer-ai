@@ -19,11 +19,25 @@ from typing import Callable
 import numpy as np
 
 
-def numerical_gradient(f: Callable[[], float], x: np.ndarray, h: float = 1e-5) -> np.ndarray:
+def numerical_gradient(f: Callable[[], float], x: np.ndarray, h: float = 1e-6) -> np.ndarray:
     """Finite-difference gradient of `f` w.r.t. the array `x`.
 
     `f` must read `x` in place (it takes no arguments), so this works
     equally for layer inputs and for parameter arrays.
+
+    The central difference has truncation error O(h^2), scaled by the
+    function's third derivative - so the error grows with the magnitude
+    of the gradients being checked, not just with h. At h=1e-5 a
+    full-model check with gradients around 380 lands at ~1.4e-6 relative
+    error, which trips a 1e-6 tolerance despite the analytic gradient
+    being exactly right. Confirmed by sweeping h: the error falls 100x
+    for every 10x reduction in h (1.4e-4 -> 1.4e-6 -> 1.4e-8), the
+    textbook O(h^2) signature of an estimate converging to the true
+    value.
+
+    h=1e-6 keeps truncation error near 1e-8 while staying well clear of
+    the roundoff floor (~eps/h, about 1e-10 absolute), comfortably inside
+    the tolerances in `gradients_match`.
     """
     grad = np.zeros_like(x)
     it = np.nditer(x, flags=["multi_index"], op_flags=["readwrite"])

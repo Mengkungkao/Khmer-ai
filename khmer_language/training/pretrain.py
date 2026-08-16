@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from ..models.from_scratch.gpt import KhmerGPT
-from ..models.from_scratch.optimizer import Adam, clip_grad_norm
+from ..models.from_scratch.optimizer import Adam, clip_grad_norm, cosine_lr
 from ..tokenizer.base import BaseTokenizer
 
 
@@ -108,6 +108,8 @@ def train(
     log_every: int | None = None,
     validation_data: np.ndarray | None = None,
     eval_every: int | None = None,
+    schedule: bool = True,
+    warmup_steps: int | None = None,
 ) -> TrainingReport:
     """Train `model` on a flat id stream. Returns per-step loss history.
 
@@ -120,8 +122,11 @@ def train(
     optimizer = Adam(model.parameters(), lr=lr)
     report = TrainingReport()
     eval_every = eval_every or max(1, steps // 10)
+    warmup = warmup_steps if warmup_steps is not None else max(1, int(steps * 0.05))
 
     for step in range(steps):
+        if schedule:
+            optimizer.lr = cosine_lr(step, steps, lr, warmup=warmup)
         x, y = make_batch(data, batch_size, seq_len, rng)
 
         optimizer.zero_grad()

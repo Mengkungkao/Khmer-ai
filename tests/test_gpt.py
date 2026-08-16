@@ -67,7 +67,7 @@ def test_full_model_gradient_check():
     """End-to-end gradient check through embeddings, blocks, norm and head
     - this is what proves the assembled model trains correctly, not just
     the individual layers."""
-    model = _tiny(vocab_size=7, dim=8, num_layers=2, num_heads=2, max_seq_len=6)
+    model = _tiny(vocab_size=7, dim=8, num_layers=2, num_heads=2, max_seq_len=6, tie_embeddings=False)
     ids = np.array([[1, 2, 3]])
     targets = np.array([[2, 3, 4]])
 

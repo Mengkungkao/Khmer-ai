@@ -151,8 +151,24 @@ class GELU(Layer):
 class Embedding(Layer):
     """Integer token ids -> dense vectors (a differentiable row lookup)."""
 
-    def __init__(self, num_embeddings: int, dim: int, rng: np.random.Generator):
-        self.weight = Parameter(rng.normal(0.0, 1.0 / np.sqrt(dim), size=(num_embeddings, dim)))
+    # GPT-2's initialization scale. Deliberately smaller than the
+    # 1/sqrt(dim) used for Linear layers, and it matters most when the
+    # embedding is tied to the output head: logits are then x @ E.T, so
+    # the embedding scale sets how confident the model is before it has
+    # learned anything. At 1/sqrt(dim) the untrained logits have unit
+    # variance and the model starts out confidently wrong - measurably
+    # worse than uniform. At 0.02 predictions start near-uniform, which
+    # is the correct prior for a model that knows nothing.
+    DEFAULT_INIT_STD = 0.02
+
+    def __init__(
+        self,
+        num_embeddings: int,
+        dim: int,
+        rng: np.random.Generator,
+        std: float = DEFAULT_INIT_STD,
+    ):
+        self.weight = Parameter(rng.normal(0.0, std, size=(num_embeddings, dim)))
         self._ids: np.ndarray | None = None
 
     def parameters(self) -> list[Parameter]:
