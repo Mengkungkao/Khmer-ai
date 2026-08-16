@@ -38,6 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from khmer_language.corpus import read_jsonl  # noqa: E402
+from khmer_language.unicode import codepoints as cp_db  # noqa: E402
 
 KHMER_BLOCK = range(0x1780, 0x1800)
 
@@ -81,6 +82,23 @@ def main() -> int:
                 # noun and verb is segmented identically either way.
                 entries.setdefault(word, record.get("pos", "unknown"))
     print(f"{len(entries):,} Khmer headwords from Wiktionary")
+
+    # Khmer punctuation, signs and digits are not dictionary headwords, but
+    # they ARE units the segmenter must be able to emit. Without them the
+    # segmenter treats each as an unknown fragment: ៗ, the repetition sign,
+    # accounted for 133 of the "missing words" in a corpus sample despite
+    # being a perfectly ordinary character. Project 1's character database
+    # already knows all of them, so the two data sources are combined here
+    # rather than these being re-typed by hand.
+    signs = 0
+    for sign in cp_db.SIGNS:
+        if sign.kind in ("PUNCTUATION", "CURRENCY", "SIGN", "OTHER"):
+            if entries.setdefault(sign.char, "punct") == "punct":
+                signs += 1
+    for digit in cp_db.DIGITS + cp_db.LEK_ATTAK:
+        if entries.setdefault(digit.char, "num") == "num":
+            signs += 1
+    print(f"  plus {signs} Khmer signs/digits from the character database")
 
     # Corpus frequency. A dictionary alone cannot rank candidate splits:
     # segmentation is ambiguous, and the deciding evidence is which words

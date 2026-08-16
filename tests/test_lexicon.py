@@ -126,6 +126,22 @@ def test_smoothing_gives_unseen_dictionary_words_usable_probability():
     assert lexicon.logprob("ក") > -25.0
 
 
+def test_built_lexicon_contains_khmer_signs():
+    """Khmer punctuation and signs are not dictionary headwords, but the
+    segmenter must still be able to emit them. Without them ៗ (the
+    repetition sign) was reported as an unknown word 133 times in a
+    corpus sample. Project 1's character database supplies them.
+    """
+    from khmer_language.lexicon import DEFAULT_LEXICON
+
+    if not DEFAULT_LEXICON.exists():
+        pytest.skip("lexicon not built; run scripts/build_lexicon.py")
+
+    lexicon = KhmerLexicon.load()
+    for sign in ("ៗ", "។", "៕", "០", "៩"):
+        assert sign in lexicon, f"{sign!r} should be in the lexicon"
+
+
 def test_missing_lexicon_file_reports_how_to_build_it(tmp_path):
     with pytest.raises(FileNotFoundError, match="build_lexicon"):
         KhmerLexicon.load(tmp_path / "absent.jsonl")

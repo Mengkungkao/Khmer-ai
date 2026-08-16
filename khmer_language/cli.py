@@ -146,6 +146,41 @@ def _run_benchmark(cases_path: str | None, checkpoint: str | None = None) -> int
     return 0
 
 
+def _run_segment(text: str) -> int:
+    """Dictionary-based word segmentation with parts of speech."""
+    from .grammar import analyze_sentence
+    from .lexicon import KhmerLexicon, WordSegmenter
+    from .unicode.sentence import sentence_strings
+
+    try:
+        lexicon = KhmerLexicon.load()
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    segmenter = WordSegmenter(lexicon)
+    print(f"lexicon: {len(lexicon):,} words\n")
+
+    for sentence in sentence_strings(text):
+        words = [w for w in segmenter.segment(sentence) if w.text.strip()]
+        print(sentence)
+        print("  words: " + " | ".join(w.text for w in words))
+        print("  pos:   " + " | ".join((w.pos or "?") for w in words))
+
+        grammar = analyze_sentence(sentence)
+        detail = f"  {'question' if grammar.is_question else 'statement'}"
+        if grammar.is_negated:
+            detail += ", negated"
+        detail += f", tense {grammar.tense}, aspect {grammar.aspect}"
+        print(detail)
+        print(f"  lexicon coverage: {segmenter.coverage(sentence):.0%}")
+        unknown = segmenter.unknown_words(sentence)
+        if unknown:
+            print(f"  not in dictionary: {', '.join(sorted(set(unknown))[:6])}")
+        print()
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
 
@@ -186,12 +221,24 @@ def main(argv: list[str] | None = None) -> int:
         help="run the KhmerAI benchmark (defaults to data/benchmark/cases.jsonl)",
     )
     parser.add_argument(
+        "--segment",
+        action="store_true",
+        help="segment the given Khmer text into words with parts of speech",
+    )
+    parser.add_argument(
         "--benchmark-model",
         default=None,
         metavar="CHECKPOINT",
         help="score this checkpoint against the authored benchmark cases",
     )
     args = parser.parse_args(argv)
+
+    if args.segment:
+        segment_text = " ".join(args.text) if args.text else sys.stdin.read().strip()
+        if not segment_text:
+            print("usage: python -m khmer_language --segment <khmer text>", file=sys.stderr)
+            return 1
+        return _run_segment(segment_text)
 
     if args.benchmark is not None or args.benchmark_model is not None:
         return _run_benchmark(
