@@ -9,6 +9,7 @@ from .document import Document, read_jsonl, write_jsonl
 from .language_id import LanguageScore, identify, is_khmer
 from .pipeline import PipelineResult, PipelineStats, run_pipeline, to_sentences
 from .quality import QualityReport, format_quality, score_document
+from .split import CorpusSplit, split_documents
 
 __all__ = [
     "DedupResult",
@@ -30,4 +31,6 @@ __all__ = [
     "QualityReport",
     "format_quality",
     "score_document",
+    "CorpusSplit",
+    "split_documents",
 ]

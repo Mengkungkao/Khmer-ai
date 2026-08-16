@@ -47,14 +47,53 @@ def make_batch(
 class TrainingReport:
     losses: list[float] = field(default_factory=list)
     grad_norms: list[float] = field(default_factory=list)
+    # (step, validation loss) pairs - held-out, so unlike `losses` these
+    # measure generalization rather than memorization.
+    validation_losses: list[tuple[int, float]] = field(default_factory=list)
 
     @property
     def final_loss(self) -> float:
         return self.losses[-1] if self.losses else float("nan")
 
     @property
+    def final_validation_loss(self) -> float:
+        return self.validation_losses[-1][1] if self.validation_losses else float("nan")
+
+    @property
     def improved(self) -> bool:
         return len(self.losses) > 1 and self.losses[-1] < self.losses[0]
+
+    @property
+    def overfitting(self) -> bool:
+        """Whether validation loss has started rising while training loss
+        keeps falling - the signature of memorizing rather than learning."""
+        if len(self.validation_losses) < 2:
+            return False
+        best = min(v for _, v in self.validation_losses)
+        return self.validation_losses[-1][1] > best * 1.05
+
+
+def evaluate(
+    model: KhmerGPT,
+    data: np.ndarray,
+    seq_len: int,
+    batches: int = 8,
+    batch_size: int = 8,
+    seed: int = 12345,
+) -> float:
+    """Mean loss on held-out data.
+
+    Uses a fixed seed so the same windows are sampled every time it is
+    called: otherwise the validation curve would move because of sampling
+    noise rather than because the model changed.
+    """
+    rng = np.random.default_rng(seed)
+    total = 0.0
+    for _ in range(batches):
+        x, y = make_batch(data, batch_size, seq_len, rng)
+        loss, _ = model.loss(x, y)
+        total += loss
+    return total / batches
 
 
 def train(
@@ -67,12 +106,20 @@ def train(
     max_grad_norm: float = 1.0,
     seed: int = 0,
     log_every: int | None = None,
+    validation_data: np.ndarray | None = None,
+    eval_every: int | None = None,
 ) -> TrainingReport:
-    """Train `model` on a flat id stream. Returns per-step loss history."""
+    """Train `model` on a flat id stream. Returns per-step loss history.
+
+    Pass `validation_data` (a held-out id stream from documents the model
+    never trains on - see `corpus/split.py`) to track generalization
+    alongside training loss.
+    """
     seq_len = seq_len or min(model.config.max_seq_len, 32)
     rng = np.random.default_rng(seed)
     optimizer = Adam(model.parameters(), lr=lr)
     report = TrainingReport()
+    eval_every = eval_every or max(1, steps // 10)
 
     for step in range(steps):
         x, y = make_batch(data, batch_size, seq_len, rng)
@@ -86,7 +133,16 @@ def train(
         report.losses.append(loss)
         report.grad_norms.append(grad_norm)
 
-        if log_every and (step + 1) % log_every == 0:
-            print(f"step {step + 1:5d}/{steps}  loss {loss:.4f}  grad_norm {grad_norm:.3f}")
+        is_last = step + 1 == steps
+        if validation_data is not None and ((step + 1) % eval_every == 0 or is_last):
+            report.validation_losses.append(
+                (step + 1, evaluate(model, validation_data, seq_len, batch_size=batch_size))
+            )
+
+        if log_every and ((step + 1) % log_every == 0 or is_last):
+            message = f"step {step + 1:5d}/{steps}  loss {loss:.4f}  grad_norm {grad_norm:.3f}"
+            if report.validation_losses:
+                message += f"  val_loss {report.validation_losses[-1][1]:.4f}"
+            print(message, flush=True)
 
     return report
