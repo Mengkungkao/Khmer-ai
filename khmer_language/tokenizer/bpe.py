@@ -79,24 +79,68 @@ class BPETokenizer(BaseTokenizer):
         else:
             self.alphabet_exceeds_vocab = False
 
-        while len(self.vocab) < vocab_size:
-            pair_counts: Counter[tuple[str, str]] = Counter()
-            for seq, freq in seq_freqs.items():
-                for a, b in zip(seq, seq[1:]):
-                    pair_counts[(a, b)] += freq
+        # Incremental pair counting. The obvious implementation recounts
+        # every pair in the whole corpus after each merge, which is
+        # O(merges x corpus) and does not finish on real data - training
+        # to vocab 4,000 on 60 Wikipedia articles ran over 12 minutes
+        # without completing a single configuration.
+        #
+        # Merging a pair only changes the sequences that actually contain
+        # it, so instead: keep a running pair count plus an index from
+        # pair -> the sequences containing it, and on each merge touch
+        # only those sequences, subtracting the pairs they lose and adding
+        # the ones they gain. Same merges, same order, vastly less work.
+        sequences: list[list[str]] = [list(seq) for seq in seq_freqs]
+        frequencies: list[int] = [seq_freqs[seq] for seq in seq_freqs]
 
+        pair_counts: Counter[tuple[str, str]] = Counter()
+        pair_locations: dict[tuple[str, str], set[int]] = {}
+
+        def index_sequence(i: int, sign: int) -> None:
+            symbols, freq = sequences[i], frequencies[i]
+            for a, b in zip(symbols, symbols[1:]):
+                pair = (a, b)
+                pair_counts[pair] += sign * freq
+                if sign > 0:
+                    pair_locations.setdefault(pair, set()).add(i)
+
+        for i in range(len(sequences)):
+            index_sequence(i, +1)
+
+        while len(self.vocab) < vocab_size:
+            # Ties are the common case, not an edge case: on the first
+            # iteration of the sample corpus, two distinct pairs share the
+            # top count. Both the original and the incremental version
+            # resolved them by dict insertion order, which is an artifact
+            # of how the counts were accumulated rather than a decision -
+            # and the two orders differ, so the same corpus produced
+            # different tokenizers.
+            #
+            # Ties are therefore broken lexicographically on the pair.
+            # The choice is arbitrary; being explicit and independent of
+            # dict ordering is what matters, so training is reproducible.
             if not pair_counts:
                 break
-            best_pair, best_count = pair_counts.most_common(1)[0]
+            best_pair = max(pair_counts, key=lambda pair: (pair_counts[pair], pair))
+            best_count = pair_counts[best_pair]
+
             if best_count < min_frequency:
                 break
 
             merged = best_pair[0] + best_pair[1]
             self.vocab.add(merged)
             self.merges.append(best_pair)
-            seq_freqs = Counter(
-                {_apply_merge(seq, best_pair, merged): freq for seq, freq in seq_freqs.items()}
-            )
+
+            affected = pair_locations.pop(best_pair, set())
+            for i in affected:
+                index_sequence(i, -1)  # remove this sequence's old pairs
+                sequences[i] = list(_apply_merge(tuple(sequences[i]), best_pair, merged))
+                index_sequence(i, +1)  # and add its new ones
+
+            # Counts can reach zero; drop them so the scan above stays small.
+            for pair in [p for p, c in pair_counts.items() if c <= 0]:
+                del pair_counts[pair]
+                pair_locations.pop(pair, None)
 
     def tokenize(self, text: str) -> list[str]:
         symbols = tuple(grapheme_strings(text))
