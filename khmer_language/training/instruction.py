@@ -48,6 +48,11 @@ from ..tokenizer.base import EOS, BaseTokenizer
 PROMPT_MARKER = "### សំណួរ:"
 RESPONSE_MARKER = "### ចម្លើយ:"
 
+# Recorded in the checkpoint by `save_checkpoint(prompt_format=...)` so a
+# loader can tell that this model must be prompted through `answer()`
+# rather than fed raw text.
+PROMPT_FORMAT = "instruction"
+
 
 @dataclass(frozen=True)
 class InstructionExample:

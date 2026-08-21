@@ -37,6 +37,7 @@ from khmer_language.models.from_scratch.checkpoint import (  # noqa: E402
     save_checkpoint,
 )
 from khmer_language.training.instruction import (  # noqa: E402
+    PROMPT_FORMAT,
     answer,
     finetune,
     load_instructions,
@@ -102,7 +103,7 @@ def main() -> int:
     print(f"\nreproduced {correct}/{len(examples)} training answers exactly")
     print("(on TRAINING questions - this measures memorization, not ability)")
 
-    saved = save_checkpoint(args.save, model, tokenizer)
+    saved = save_checkpoint(args.save, model, tokenizer, prompt_format=PROMPT_FORMAT)
     print(f"\nsaved to {saved}")
     print(f"  chat with it:  python3 scripts/chat.py --checkpoint {saved}")
     return 0

@@ -19,9 +19,11 @@ Currently measurable (real checks, from Project 1's engine):
     unassigned code points
   - Script composition: how much of the output is even Khmer
   - Repetition: degenerate loops, the classic undertrained-LM failure
+  - Spelling: likely misspellings against the Khmer dictionary - but only
+    once that dictionary has been built, so this one check reports either
+    a real score or UNAVAILABLE depending on the machine it runs on
 
 Not yet measurable, reported as UNAVAILABLE with the reason:
-  - Spelling      - needs the Khmer dictionary from README section 8
   - Grammar       - needs a parser or a trained grammar model
   - Meaning       - needs reference answers or a judge model
   - Naturalness   - needs a reference LM or human ratings
@@ -38,6 +40,8 @@ from ..unicode.validator import ValidationIssue, validate
 PASS = "PASS"
 FAIL = "FAIL"
 UNAVAILABLE = "UNAVAILABLE"
+
+NO_LEXICON = "needs the Khmer dictionary - build it with scripts/build_lexicon.py"
 
 
 @dataclass(frozen=True)
@@ -79,12 +83,14 @@ def _khmer_ratio(text: str) -> float:
     return ratio
 
 
-def _spelling_check(text: str, min_score: float = 0.9) -> Check | None:
+def _spelling_check(text: str, min_score: float = 0.9) -> Check:
     """Spelling, if a lexicon has been built.
 
-    Returns None when no lexicon exists, so the report falls back to
-    listing spelling as unavailable rather than silently passing text
-    nothing actually checked.
+    Always returns a Check. When no lexicon exists - or the output has
+    no Khmer words in it - that Check is UNAVAILABLE, so the row stays
+    in the report and says why. Dropping it instead would quietly shrink
+    the report from seven checks to six, and a reader comparing two runs
+    would see spelling simply absent rather than unmeasured.
 
     Only *likely misspellings* count against the score - words a single
     edit away from a real dictionary word. Words simply absent from the
@@ -97,18 +103,18 @@ def _spelling_check(text: str, min_score: float = 0.9) -> Check | None:
         from ..lexicon import KhmerLexicon
         from ..lexicon.spelling import SpellChecker
     except ImportError:  # pragma: no cover
-        return None
+        return Check("Spelling", UNAVAILABLE, NO_LEXICON)
 
     global _SPELL_CHECKER
     if _SPELL_CHECKER is None:
         try:
             _SPELL_CHECKER = SpellChecker(KhmerLexicon.load())
         except FileNotFoundError:
-            return None
+            return Check("Spelling", UNAVAILABLE, NO_LEXICON)
 
     report = _SPELL_CHECKER.check(text)
     if not report.checks:
-        return None
+        return Check("Spelling", UNAVAILABLE, "no Khmer words in the output to check")
 
     detail = f"{len(report.misspelled)} likely misspelling(s)"
     if report.unknown:
@@ -177,17 +183,17 @@ def analyze_output(
 
     spelling_check = _spelling_check(text)
 
-    unavailable = (
+    checks = (
+        unicode_check,
+        script_check,
+        repetition_check,
+        spelling_check,
         Check("Grammar", UNAVAILABLE, "needs a parser or trained grammar model"),
         Check("Meaning", UNAVAILABLE, "needs reference answers or a judge model"),
         Check("Naturalness", UNAVAILABLE, "needs a reference LM or human ratings"),
     )
 
-    implemented = (unicode_check, script_check, repetition_check)
-    if spelling_check is not None:
-        implemented += (spelling_check,)
-
-    return ErrorReport(text=text, checks=implemented + unavailable, issues=issues)
+    return ErrorReport(text=text, checks=checks, issues=issues)
 
 
 def format_report(report: ErrorReport) -> str:

@@ -4,6 +4,7 @@ import pytest
 from khmer_language.models.from_scratch.checkpoint import (
     CheckpointError,
     load_checkpoint,
+    read_metadata,
     save_checkpoint,
 )
 from khmer_language.models.from_scratch.gpt import GPTConfig, KhmerGPT
@@ -202,3 +203,38 @@ def test_shape_mismatch_is_detected(tmp_path):
 
     with pytest.raises(CheckpointError, match="shape"):
         load_checkpoint(path)
+
+
+def test_prompt_format_round_trips(tmp_path):
+    """An instruction-tuned model has to be prompted through the format it
+    was tuned on, and nothing in the weights says so - the checkpoint has
+    to carry it."""
+    from khmer_language.training.instruction import PROMPT_FORMAT
+
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer, prompt_format=PROMPT_FORMAT)
+
+    assert read_metadata(path)["prompt_format"] == PROMPT_FORMAT
+
+
+def test_plain_checkpoint_has_no_prompt_format(tmp_path):
+    """Absent, not "": a caller checking the field must not read a
+    pretrained completion model as instruction-tuned."""
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+
+    assert "prompt_format" not in read_metadata(path)
+
+
+def test_read_metadata_does_not_need_the_weights(tmp_path):
+    model, tokenizer = _grapheme_setup()
+    path = save_checkpoint(tmp_path / "m.npz", model, tokenizer)
+
+    metadata = read_metadata(path)
+    assert metadata["tokenizer"] == "GraphemeTokenizer"
+    assert metadata["vocab"] == tokenizer.vocab.id_to_token
+
+
+def test_read_metadata_rejects_a_missing_file(tmp_path):
+    with pytest.raises(CheckpointError, match="no checkpoint"):
+        read_metadata(tmp_path / "nope.npz")

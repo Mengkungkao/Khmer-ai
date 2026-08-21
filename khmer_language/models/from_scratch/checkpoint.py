@@ -48,8 +48,22 @@ class CheckpointError(RuntimeError):
     """Raised when a checkpoint cannot be loaded or used as intended."""
 
 
-def save_checkpoint(path: str | Path, model: KhmerGPT, tokenizer: BaseTokenizer) -> Path:
-    """Write model weights, architecture and tokenizer to one .npz file."""
+def save_checkpoint(
+    path: str | Path,
+    model: KhmerGPT,
+    tokenizer: BaseTokenizer,
+    *,
+    prompt_format: str | None = None,
+) -> Path:
+    """Write model weights, architecture and tokenizer to one .npz file.
+
+    `prompt_format` records how the model expects to be *prompted* - for
+    an instruction-tuned model, "instruction". This belongs with the
+    weights for the same reason the vocabulary does: a model fine-tuned
+    on the question/answer format produces degenerate text when fed raw
+    prompts, and nothing about the weights reveals that. Omitted means a
+    plain completion model.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -60,6 +74,8 @@ def save_checkpoint(path: str | Path, model: KhmerGPT, tokenizer: BaseTokenizer)
         "tokenizer": name,
         "vocab": tokenizer.vocab.id_to_token,
     }
+    if prompt_format is not None:
+        metadata["prompt_format"] = prompt_format
 
     if name == "BPETokenizer":
         metadata["merges"] = [list(pair) for pair in tokenizer.merges]
@@ -97,8 +113,13 @@ def _restore_tokenizer(metadata: dict) -> BaseTokenizer:
     return tokenizer
 
 
-def load_checkpoint(path: str | Path) -> tuple[KhmerGPT, BaseTokenizer]:
-    """Load a model and its tokenizer back from a checkpoint."""
+def read_metadata(path: str | Path) -> dict:
+    """Read a checkpoint's metadata without building the model.
+
+    Callers that only need to know *how to use* a checkpoint - which
+    prompt format it expects, what vocabulary it carries - should not
+    have to allocate its weights to find out.
+    """
     path = Path(path)
     if not path.exists():
         raise CheckpointError(f"no checkpoint at {path}")
@@ -110,12 +131,21 @@ def load_checkpoint(path: str | Path) -> tuple[KhmerGPT, BaseTokenizer]:
                 "weights only, so the architecture and tokenizer it needs are unknown"
             )
         metadata = json.loads(str(data["metadata"]))
-        if metadata.get("version") != CHECKPOINT_VERSION:
-            raise CheckpointError(
-                f"checkpoint version {metadata.get('version')} "
-                f"!= supported {CHECKPOINT_VERSION}"
-            )
 
+    if metadata.get("version") != CHECKPOINT_VERSION:
+        raise CheckpointError(
+            f"checkpoint version {metadata.get('version')} "
+            f"!= supported {CHECKPOINT_VERSION}"
+        )
+    return metadata
+
+
+def load_checkpoint(path: str | Path) -> tuple[KhmerGPT, BaseTokenizer]:
+    """Load a model and its tokenizer back from a checkpoint."""
+    path = Path(path)
+    metadata = read_metadata(path)
+
+    with np.load(path, allow_pickle=True) as data:
         config_fields = dict(metadata["config"])
         saved_arrays = sum(1 for name in data.files if name.startswith("p"))
 
